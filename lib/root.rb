@@ -39,7 +39,7 @@ class Root < Page
   private
 
   def page_ext
-    '.page'
+    '.yml'
   end
 
   def glob( dirs, slug, ext )

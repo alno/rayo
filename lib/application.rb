@@ -1,5 +1,4 @@
 require 'sinatra/base'
-require 'radius'
 
 require 'lib/page'
 require 'lib/root'
@@ -21,7 +20,7 @@ class Application < Sinatra::Base
     root = Root.new # Root page
     page = root.descendant( path ) # Find page by path
 
-    [ page.status, page.render ] # Return page status and content
+    [ page[:status], page.render ] # Return page status and content
   end
 
   def redirect_to_lang( path )
