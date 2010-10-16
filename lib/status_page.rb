@@ -2,12 +2,10 @@ require File.join(File.dirname(__FILE__), 'page.rb')
 
 class StatusPage < Page
 
-  def initialize( status )
-    super()
+  def initialize( root, path, status )
+    super( root, root, status.to_s, path )
 
     @status = status
-
-    self.slug = status.to_s
   end
 
   def context

@@ -2,7 +2,7 @@ require File.dirname(__FILE__) + '/spec_helper'
 
 describe Page do
 
-  class TestRoot < Root
+  class TestRoot < RootPage
 
     def file
       'index.part'
@@ -11,6 +11,10 @@ describe Page do
     def directories
       [ 'content' ]
     end
+
+  end
+
+  class TestStorage < Storage
 
     def find_page_file( dirs, slug )
       p = dirs.first + '/' + slug
@@ -36,7 +40,7 @@ describe Page do
   end
 
   before :each do
-    @root = TestRoot.new
+    @root = TestRoot.new( TestStorage.new )
   end
 
   it "should find root page" do
@@ -49,7 +53,7 @@ describe Page do
     page.should_not be_nil
     page.path.should == ['test']
     page.slug.should == 'test'
-    page.params.should == {}
+    page.params.should == { 'path' => ['test'] }
   end
 
   it "should find page with param" do
@@ -57,7 +61,7 @@ describe Page do
     page.should_not be_nil
     page.path.should == ['users','alex']
     page.slug.should == 'alex'
-    page.params.should == { 'name' => 'alex' }
+    page.params.should == { 'path' => ['users','alex'], 'name' => 'alex' }
   end
 
 end

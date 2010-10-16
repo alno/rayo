@@ -11,7 +11,7 @@ class PageParts
     return @files if @files
 
     @files = @page.parent ? @page.parent.parts.files.clone : {}
-    @files.merge! @page.root.find_page_part_files( @page.file ) if @page.file
+    @files.merge! @page.root.storage.find_page_part_files( @page.file ) if @page.file
     @files
   end
 
