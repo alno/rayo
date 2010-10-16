@@ -6,6 +6,7 @@ class Root < Page
     self.root = self
     self.parent = nil
     self.slug = nil
+    self.path = []
   end
 
   def directories
@@ -15,15 +16,18 @@ class Root < Page
   def file
     return @file if defined? @file
 
-    @file = 'index.page'
-    @file = nil unless File.file?( File.join( absdir, @file ) )
+    @file = 'index'
+    @file = nil unless File.file?( File.join( absdir, @file ) + page_ext )
     @file
   end
 
+  def params
+    @params ||= {}
+  end
+
   def find_page_file( parent, slug )
-    glob parent, slug, '.page' do |file|
-      puts file
-      return file if File.file?( File.join( absdir, file ) )
+    glob parent, slug, page_ext do |file|
+      return file if File.file?( File.join( absdir, file ) + page_ext )
     end
     nil
   end
@@ -42,12 +46,16 @@ class Root < Page
 
   private
 
+  def page_ext
+    '.page'
+  end
+
   def glob( parent, slug, ext )
     parent.directories.each do |dir|
-      yield File.join( dir, slug + ext )
+      yield File.join( dir, slug )
 
       Dir.glob File.join( absdir, dir, '%*' + ext ) do |file|
-        yield File.join( dir, File.basename( file ) )
+        yield File.join( dir, File.basename( file, ext ) )
       end
     end
   end
