@@ -47,16 +47,18 @@ class Root < Page
     res
   end
 
-  def find_page_parts( file )
+  def find_page_part_files( file )
     parts = {}
     Dir.glob file + ".*" do |part_file|
       name_parts = File.basename( part_file ).split('.')
       name_parts.shift # Remove base (slug or param)
 
-      if name_parts.size == 1
-        parts[ 'content' ] = part_file
-      else
-        parts[ name_parts.shift ] = part_file
+      if name_parts.last == 'html'
+        if name_parts.size == 1
+          parts[ 'content' ] = part_file
+        else
+          parts[ name_parts.shift ] = part_file
+        end
       end
     end
     parts

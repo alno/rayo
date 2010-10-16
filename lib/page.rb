@@ -1,6 +1,7 @@
 require 'yaml'
 require 'erubis'
-require 'radius'
+
+require File.join(File.dirname(__FILE__), 'page_parts.rb')
 
 class Page
 
@@ -56,11 +57,7 @@ class Page
   end
 
   def parts
-    return @parts if @parts
-
-    @parts = parent ? parent.parts.clone : {}
-    @parts.merge! root.find_page_parts( file ) if file
-    @parts
+    @parts ||= PageParts.new( self )
   end
 
   def []( key )
@@ -70,7 +67,7 @@ class Page
   end
 
   def render
-    "#{slug}|#{path.inspect}|#{file}|#{directories.inspect}|#{params.inspect}|#{context.inspect}|#{parts.inspect}"
+    "#{slug}|#{path.inspect}|#{file}|#{directories.inspect}|#{params.inspect}|#{context.inspect}|#{parts.files.inspect}" + parts['content']
   end
 
   private

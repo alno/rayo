@@ -23,7 +23,7 @@ class StatusPage < Page
   end
 
   def render
-    "#{slug}|#{path.inspect}|#{file}|#{directories.inspect}|#{params.inspect}|#{context.inspect}|#{parts.inspect}"
+    "#{slug}|#{path.inspect}|#{file}|#{directories.inspect}|#{params.inspect}|#{context.inspect}|#{parts.files.inspect}" + parts['content']
   end
 
 end
