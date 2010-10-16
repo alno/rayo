@@ -1,4 +1,4 @@
-class Renderable
+class Models::Renderable
 
   attr_reader :file
 

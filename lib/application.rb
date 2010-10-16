@@ -10,7 +10,6 @@ end
 
 require File.join(File.dirname(__FILE__), 'storage.rb')
 
-
 class Application < Sinatra::Base
 
   @@langs = ['ru','en']

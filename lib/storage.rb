@@ -1,5 +1,5 @@
-require File.join(File.dirname(__FILE__), 'root_page.rb')
-require File.join(File.dirname(__FILE__), 'renderable.rb')
+require File.join(File.dirname(__FILE__), 'models', 'root_page.rb')
+require File.join(File.dirname(__FILE__), 'models', 'renderable.rb')
 
 require File.join(File.dirname(__FILE__), 'taggable.rb')
 require File.join(File.dirname(__FILE__), 'tags/standard_tags.rb')
@@ -23,7 +23,7 @@ class Storage
 
   def layout( name )
     @layouts ||= {}
-    @layouts[name.to_s] ||= Renderable.new( find_layout_file( name ) || raise( "Layout '#{name}' not found" ) )
+    @layouts[name.to_s] ||= Models::Renderable.new( find_layout_file( name ) || raise( "Layout '#{name}' not found" ) )
   end
 
   def directory( content_type )
@@ -31,7 +31,7 @@ class Storage
   end
 
   def root_page
-    @root_page ||= RootPage.new( self )
+    @root_page ||= Models::RootPage.new( self )
   end
 
   def page( path )
@@ -39,7 +39,7 @@ class Storage
   end
 
   def status_page( path, status )
-    StatusPage.new( self, root_page, path, status )
+    Models::StatusPage.new( self, root_page, path, status )
   end
 
   def find_layout_file( name )
@@ -72,9 +72,9 @@ class Storage
 
       if content_ext? name_parts.last
         if name_parts.size == 1
-          parts[ 'body' ] = Renderable.new( part_file )
+          parts[ 'body' ] = Models::Renderable.new( part_file )
         else
-          parts[ name_parts.shift ] = Renderable.new( part_file )
+          parts[ name_parts.shift ] = Models::Renderable.new( part_file )
         end
       end
     end

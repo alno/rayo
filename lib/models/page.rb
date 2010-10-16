@@ -2,9 +2,9 @@ require 'yaml'
 require 'erubis'
 require 'radius'
 
-require File.join(File.dirname(__FILE__), 'tag_context.rb')
+require File.join(File.dirname(__FILE__), '..', 'tag_context.rb')
 
-class Page
+class Models::Page
 
   attr_reader :storage, :parent, :path
 
@@ -22,7 +22,7 @@ class Page
     @children_cache ||= {}
     return @children_cache[ slug ] if @children_cache.include? slug
 
-    page = Page.new( @storage, self, @path + [slug] )
+    page = Models::Page.new( @storage, self, @path + [slug] )
     page = nil if page.file.nil? && page.directories.empty?
 
     @children_cache[ slug ] = page

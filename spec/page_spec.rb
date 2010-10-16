@@ -1,8 +1,8 @@
 require File.dirname(__FILE__) + '/spec_helper'
 
-describe Page do
+describe Models::Page do
 
-  class TestRoot < RootPage
+  class TestRoot < Models::RootPage
 
     def file
       'index.part'
