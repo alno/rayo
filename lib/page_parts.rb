@@ -11,7 +11,7 @@ class PageParts
     return @files if @files
 
     @files = @page.parent ? @page.parent.parts.files.clone : {}
-    @files.merge! @page.root.storage.find_page_part_files( @page.file ) if @page.file
+    @files.merge! @page.storage.find_page_part_files( @page.file ) if @page.file
     @files
   end
 
@@ -33,14 +33,27 @@ class PageParts
     end
   end
 
-  private
-
   def parser
     @parser ||= Radius::Parser.new( context, :tag_prefix => 'r' )
   end
 
   def context
     @context ||= Radius::Context.new do |c|
+      c.define_tag 'content_for_layout' do
+        'Hello world'
+      end
+      c.define_tag 'snippet' do |tag|
+        number = (tag.attr['times'] || '1').to_i
+        result = ''
+        number.times { result << tag.expand }
+        result
+      end
+      c.define_tag 'content' do |tag|
+        number = (tag.attr['times'] || '1').to_i
+        result = ''
+        number.times { result << tag.expand }
+        result
+      end
       c.define_tag 'hello' do
         'Hello world'
       end

@@ -3,24 +3,16 @@ require File.join(File.dirname(__FILE__), 'status_page.rb')
 
 class RootPage < Page
 
-  attr_reader :storage
-
   def initialize( storage )
-    super( self, nil, nil, [] )
-
-    @storage = storage
+    super( storage, nil, [] )
   end
 
   def directories
-    [ File.join( File.dirname(__FILE__), '..', 'content' ) ]
+    [ @storage.directory :pages ]
   end
 
   def file
-    @file ||= storage.find_page_file( directories, 'index' )
-  end
-
-  def status_page( path, status )
-    StatusPage.new( self, path, status )
+    @file ||= @storage.find_page_file( directories, 'index' )
   end
 
   def params

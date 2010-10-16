@@ -8,13 +8,17 @@ describe Page do
       'index.part'
     end
 
-    def directories
-      [ 'content' ]
-    end
-
   end
 
   class TestStorage < Storage
+
+    def root_page
+      @root_page ||= TestRoot.new( self )
+    end
+
+    def directory( content_type )
+      'content'
+    end
 
     def find_page_file( dirs, slug )
       p = dirs.first + '/' + slug
@@ -40,7 +44,7 @@ describe Page do
   end
 
   before :each do
-    @root = TestRoot.new( TestStorage.new )
+    @root = TestStorage.new.root_page
   end
 
   it "should find root page" do
@@ -52,7 +56,6 @@ describe Page do
     page = @root.descendant(['test'])
     page.should_not be_nil
     page.path.should == ['test']
-    page.slug.should == 'test'
     page.params.should == { 'path' => ['test'] }
   end
 
@@ -60,7 +63,6 @@ describe Page do
     page = @root.descendant(['users','alex'])
     page.should_not be_nil
     page.path.should == ['users','alex']
-    page.slug.should == 'alex'
     page.params.should == { 'path' => ['users','alex'], 'name' => 'alex' }
   end
 

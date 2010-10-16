@@ -5,13 +5,11 @@ require File.join(File.dirname(__FILE__), 'page_parts.rb')
 
 class Page
 
-  attr_reader :root, :parent # Root and parent page
-  attr_reader :slug, :path # Page slug and path
+  attr_reader :storage, :parent, :path
 
-  def initialize( root, parent, slug, path )
-    @root = root
+  def initialize( storage, parent, path )
+    @storage = storage
     @parent = parent
-    @slug = slug
     @path = path
   end
 
@@ -19,32 +17,32 @@ class Page
     relative_path.inject( self ) {|page,slug| page.child( slug ) }
   end
 
-  def child( slug, abs_path = nil )
+  def child( slug )
     @children_cache ||= {}
     return @children_cache[ slug ] if @children_cache.include? slug
 
-    page = Page.new( root, self, slug, abs_path || self.path + [slug] )
+    page = Page.new( @storage, self, @path + [slug] )
     page = nil if page.file.nil? && page.directories.empty?
 
     @children_cache[ slug ] = page
   end
 
   def directories
-    @directories ||= root.storage.find_page_dirs( parent.directories, slug )
+    @directories ||= @storage.find_page_dirs( @parent.directories, @path.last )
   end
 
   def file
-    @file ||= root.storage.find_page_file( parent.directories, slug )
+    @file ||= @storage.find_page_file( @parent.directories, @path.last )
   end
 
   def params
     return @params if @params
 
-    segments = file.split(/[\/\\]/)[-path.size..-1] || raise( "File doesn't correspond to path" )
+    segments = file.split(/[\/\\]/)[-@path.size..-1] || raise( "File doesn't correspond to path" )
 
-    @params = { 'path' => path }
-    0.upto path.size - 1 do |i|
-      @params[segments[i][1..-1]] = path[i] if segments[i][0..0] == '%'
+    @params = { 'path' => @path }
+    0.upto @path.size - 1 do |i|
+      @params[segments[i][1..-1]] = @path[i] if segments[i][0..0] == '%'
     end
     @params
   end
@@ -52,12 +50,17 @@ class Page
   def context
     return @context if @context
 
-    @context = { 'status' => 200 }
-    @context.merge! load_context( file + '.yml' )
+    @context = @parent ? @parent.context.merge({ 'status' => 200 }) : { 'status' => 200 }
+    @context.merge! load_context( file + '.yml' ) if file
+    @context
   end
 
   def parts
     @parts ||= PageParts.new( self )
+  end
+
+  def layout
+    @layout ||= @storage.layout( context['layout'] )
   end
 
   def []( key )
@@ -67,7 +70,7 @@ class Page
   end
 
   def render
-    "#{slug}|#{path.inspect}|#{file}|#{directories.inspect}|#{params.inspect}|#{context.inspect}|#{parts.files.inspect}" + parts['content']
+    layout.render( self.parts.parser )
   end
 
   private
