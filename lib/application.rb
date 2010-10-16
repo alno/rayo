@@ -1,7 +1,6 @@
 require 'sinatra/base'
 
-require 'lib/page'
-require 'lib/root'
+require File.join(File.dirname(__FILE__), 'root.rb')
 
 class Application < Sinatra::Base
 
@@ -19,6 +18,7 @@ class Application < Sinatra::Base
     lang = path.shift # Determine language
     root = Root.new # Root page
     page = root.descendant( path ) # Find page by path
+    page = root.status_page( path, 404 ) unless page && page.file # Render 404 page if there are no page, or there are no file
 
     [ page[:status], page.render ] # Return page status and content
   end

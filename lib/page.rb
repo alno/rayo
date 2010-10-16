@@ -23,6 +23,7 @@ class Page
     page.parent = self
     page.slug = slug
     page.path = abs_path || self.path + [slug]
+    page = nil if page.file.nil? && page.directories.empty?
 
     @children_cache[ slug ] = page
   end
@@ -38,28 +39,28 @@ class Page
   def params
     return @params if @params
 
-    if file
-      segments = file.split(/[\/\\]/)[-path.size..-1] || raise( "File doesn't correspond to path" )
+    segments = file.split(/[\/\\]/)[-path.size..-1] || raise( "File doesn't correspond to path" )
 
-      @params = {}
-      0.upto path.size - 1 do |i|
-        @params[segments[i][1..-1]] = path[i] if segments[i][0..0] == '%'
-      end
-      @params
-    else
-      @params = {}
+    @params = { 'path' => path }
+    0.upto path.size - 1 do |i|
+      @params[segments[i][1..-1]] = path[i] if segments[i][0..0] == '%'
     end
+    @params
   end
 
   def context
     return @context if @context
 
-    if file
-      @context = { 'status' => 200 }
-      @context.merge! YAML::load( Erubis::Eruby.new( File.read( file + '.yml' ) ).result( { :path => path }.merge! params ) )
-    else
-      @context = { 'status' => 404 }
-    end
+    @context = { 'status' => 200 }
+    @context.merge! load_context( file + '.yml' )
+  end
+
+  def parts
+    return @parts if @parts
+
+    @parts = parent ? parent.parts.clone : {}
+    @parts.merge! root.find_page_parts( file ) if file
+    @parts
   end
 
   def []( key )
@@ -69,7 +70,13 @@ class Page
   end
 
   def render
-    "#{slug}|#{path.inspect}|#{file}|#{directories.inspect}|#{params.inspect}|#{context.inspect}"
+    "#{slug}|#{path.inspect}|#{file}|#{directories.inspect}|#{params.inspect}|#{context.inspect}|#{parts.inspect}"
+  end
+
+  private
+
+  def load_context( filename )
+    YAML::load( Erubis::Eruby.new( File.read( filename ) ).result( params ) )
   end
 
 end

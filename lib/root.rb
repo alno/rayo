@@ -1,3 +1,6 @@
+require File.join(File.dirname(__FILE__), 'page.rb')
+require File.join(File.dirname(__FILE__), 'status_page.rb')
+
 class Root < Page
 
   def initialize
@@ -17,8 +20,16 @@ class Root < Page
     @file ||= find_page_file( directories, 'index' )
   end
 
+  def status_page( path, status )
+    page = StatusPage.new( status )
+    page.root = self
+    page.parent = self
+    page.path = path
+    page
+  end
+
   def params
-    @params ||= {}
+    @params ||= { 'path' => path }
   end
 
   def find_page_file( dirs, slug )
@@ -34,6 +45,21 @@ class Root < Page
       res << file if File.directory?( File.join( file ) )
     end
     res
+  end
+
+  def find_page_parts( file )
+    parts = {}
+    Dir.glob file + ".*" do |part_file|
+      name_parts = File.basename( part_file ).split('.')
+      name_parts.shift # Remove base (slug or param)
+
+      if name_parts.size == 1
+        parts[ 'content' ] = part_file
+      else
+        parts[ name_parts.shift ] = part_file
+      end
+    end
+    parts
   end
 
   private
