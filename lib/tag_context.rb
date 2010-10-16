@@ -1,4 +1,4 @@
-class PageContext < Radius::Context
+class TagContext < Radius::Context
 
   attr_reader :page
 

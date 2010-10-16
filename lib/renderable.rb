@@ -1,9 +1,8 @@
-class Layout
+class Renderable
 
-  attr_reader :storage, :file
+  attr_reader :file
 
-  def initialize( storage, file )
-    @storage = storage
+  def initialize( file )
     @file = file
   end
 

@@ -1,7 +1,8 @@
 require 'yaml'
 require 'erubis'
+require 'radius'
 
-require File.join(File.dirname(__FILE__), 'page_parts.rb')
+require File.join(File.dirname(__FILE__), 'tag_context.rb')
 
 class Page
 
@@ -56,7 +57,7 @@ class Page
   end
 
   def parts
-    @parts ||= PageParts.new( self )
+    @parts ||= file ? @storage.find_page_parts( file ) : {}
   end
 
   def layout
@@ -70,7 +71,11 @@ class Page
   end
 
   def render
-    layout.render( self.parts.parser )
+    layout.render( parser )
+  end
+
+  def parser
+    @parser ||= Radius::Parser.new( TagContext.new( self ), :tag_prefix => 'r' )
   end
 
   private

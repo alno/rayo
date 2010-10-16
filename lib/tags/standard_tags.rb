@@ -12,8 +12,21 @@ module Tags::StandardTags
 
   tag 'content' do |tag|
     part_name = tag.attr['part'] || 'body'
+    inherit = tag.attr['inherit'] == 'true'
 
-    tag.locals.page.parts[part_name]
+    page = tag.locals.page
+    part = page.parts[part_name]
+
+    while inherit && !part && page.parent do
+      page = page.parent
+      part = page.parts[part_name]
+    end
+
+    if part
+      part.render( tag.globals.page.parser )
+    else
+      error "No part '#{part_name}' found for page '#{tag.locals.page.path}'"
+    end
   end
 
   tag 'content_for_layout' do |tag|

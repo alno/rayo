@@ -12,4 +12,8 @@ module Taggable
     base.extend(ClassMethods)
   end
 
+  def error( text )
+    "<strong class=\"error\">#{text}</strong>"
+  end
+
 end

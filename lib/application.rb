@@ -1,6 +1,15 @@
 require 'sinatra/base'
 
+module Tags
+
+end
+
+module Models
+
+end
+
 require File.join(File.dirname(__FILE__), 'storage.rb')
+
 
 class Application < Sinatra::Base
 

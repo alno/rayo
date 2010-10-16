@@ -1,8 +1,7 @@
 require File.join(File.dirname(__FILE__), 'root_page.rb')
-require File.join(File.dirname(__FILE__), 'layout.rb')
+require File.join(File.dirname(__FILE__), 'renderable.rb')
 
 require File.join(File.dirname(__FILE__), 'taggable.rb')
-require File.join(File.dirname(__FILE__), 'tags.rb')
 require File.join(File.dirname(__FILE__), 'tags/standard_tags.rb')
 
 class Storage
@@ -24,7 +23,7 @@ class Storage
 
   def layout( name )
     @layouts ||= {}
-    @layouts[name.to_s] ||= Layout.new( self, find_layout_file( name ) || raise( "Layout '#{name}' not found" ) )
+    @layouts[name.to_s] ||= Renderable.new( find_layout_file( name ) || raise( "Layout '#{name}' not found" ) )
   end
 
   def directory( content_type )
@@ -65,7 +64,7 @@ class Storage
     res
   end
 
-  def find_page_part_files( file )
+  def find_page_parts( file )
     parts = {}
     Dir.glob file + ".*" do |part_file|
       name_parts = File.basename( part_file ).split('.')
@@ -73,9 +72,9 @@ class Storage
 
       if content_ext? name_parts.last
         if name_parts.size == 1
-          parts[ 'body' ] = part_file
+          parts[ 'body' ] = Renderable.new( part_file )
         else
-          parts[ name_parts.shift ] = part_file
+          parts[ name_parts.shift ] = Renderable.new( part_file )
         end
       end
     end
