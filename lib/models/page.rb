@@ -18,6 +18,10 @@ class Models::Page
     relative_path.inject( self ) {|page,slug| page.child( slug ) }
   end
 
+  def children
+    @children ||= @storage.find_pages( directories ).map{|name| child( name ) }
+  end
+
   def child( slug )
     @children_cache ||= {}
     return @children_cache[ slug ] if @children_cache.include? slug
@@ -41,10 +45,13 @@ class Models::Page
 
     segments = file.split(/[\/\\]/)[-@path.size..-1] || raise( "File doesn't correspond to path" )
 
-    @params = { 'path' => @path }
-    0.upto @path.size - 1 do |i|
-      @params[segments[i][1..-1]] = @path[i] if segments[i][0..0] == '%'
+    @params = {}
+
+    segments.each_with_index do |segment,i|
+      @params[segment[1..-1]] = @path[i] if segment[0..0] == '%'
     end
+
+    @params['path'] = path
     @params
   end
 

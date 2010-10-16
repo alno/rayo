@@ -2,15 +2,22 @@ require File.join(File.dirname(__FILE__), 'models', 'root_page.rb')
 require File.join(File.dirname(__FILE__), 'models', 'renderable.rb')
 
 require File.join(File.dirname(__FILE__), 'taggable.rb')
-require File.join(File.dirname(__FILE__), 'tags/standard_tags.rb')
+require File.join(File.dirname(__FILE__), 'tags/property_tags.rb')
+require File.join(File.dirname(__FILE__), 'tags/content_tags.rb')
+require File.join(File.dirname(__FILE__), 'tags/navigation_tags.rb')
 
 class Storage
 
   def initialize
+    @layouts = {}
+    @snippets = {}
+
     @tagger = Object.new
     @tagger.extend Taggable
 
-    add_tag_library! Tags::StandardTags
+    add_tag_library! Tags::PropertyTags
+    add_tag_library! Tags::ContentTags
+    add_tag_library! Tags::NavigationTags
   end
 
   def add_tag_library!( tag_module )
@@ -21,9 +28,16 @@ class Storage
     @tagger.clone
   end
 
+  def snippet( name )
+    name = name.to_s
+
+    @snipetts[name] ||= Models::Renderable.new( find_renderable_file( :snippets, name ) || raise( "Snippet '#{name}' not found" ) )
+  end
+
   def layout( name )
-    @layouts ||= {}
-    @layouts[name.to_s] ||= Models::Renderable.new( find_layout_file( name ) || raise( "Layout '#{name}' not found" ) )
+    name = name.to_s
+
+    @layouts[name] ||= Models::Renderable.new( find_renderable_file( :layouts,  name ) || raise( "Layout '#{name}' not found" ) )
   end
 
   def directory( content_type )
@@ -42,11 +56,26 @@ class Storage
     Models::StatusPage.new( self, root_page, path, status )
   end
 
-  def find_layout_file( name )
-    Dir.glob File.join( directory( :layouts ), name.to_s + '.*' ) do |file|
+  def find_renderable_file( type, name )
+    Dir.glob File.join( directory( type ), name.to_s + '.*' ) do |file|
       return file if File.file?( file ) && content_ext?( File.extname( file )[1..-1] )
     end
     nil
+  end
+
+  def find_pages( dirs )
+    res = []
+    dirs.each do |dir|
+      Dir.glob File.join( dir, '*' ) do |file|
+        ext = File.extname( file )
+        base = File.basename( file, ext )
+
+        unless base == 'index' && dir == directory(:pages)
+          res << base if valid_page?( base ) && (File.directory?( file ) && ext.empty? || File.file?( file ) && ext == page_ext)
+        end
+      end
+    end
+    res
   end
 
   def find_page_file( dirs, slug )
@@ -85,6 +114,10 @@ class Storage
 
   def page_ext
     '.yml'
+  end
+
+  def valid_page?( name )
+    name  =~ /^[\w\d_-]+$/
   end
 
   def content_ext?( ext )

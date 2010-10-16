@@ -1,14 +1,6 @@
-module Tags::StandardTags
+module Tags::ContentTags
 
   include Taggable
-
-  tag 'page' do |tag|
-    tag.locals.page = tag.globals.page
-  end
-
-  tag 'title' do |tag|
-    tag.locals.page.context['title']
-  end
 
   tag 'content' do |tag|
     part_name = tag.attr['part'] || 'body'
