@@ -1,5 +1,7 @@
 require 'radius'
 
+require File.join(File.dirname(__FILE__), 'page_context.rb')
+
 class PageParts
 
   def initialize( page )
@@ -8,11 +10,11 @@ class PageParts
   end
 
   def files
-    return @files if @files
-
-    @files = @page.parent ? @page.parent.parts.files.clone : {}
-    @files.merge! @page.storage.find_page_part_files( @page.file ) if @page.file
-    @files
+    @files || begin
+      @files = @page.parent ? @page.parent.parts.files.clone : {}
+      @files.merge! @page.storage.find_page_part_files( @page.file ) if @page.file
+      @files
+    end
   end
 
   def []( key )
@@ -20,7 +22,7 @@ class PageParts
 
     return @results[key] if @results.include? key
 
-    file = @files[ key.to_s ]
+    file = files[ key.to_s ]
 
     return @results[key] = nil unless file
 
@@ -38,32 +40,7 @@ class PageParts
   end
 
   def context
-    @context ||= Radius::Context.new do |c|
-      c.define_tag 'content_for_layout' do
-        'Hello world'
-      end
-      c.define_tag 'snippet' do |tag|
-        number = (tag.attr['times'] || '1').to_i
-        result = ''
-        number.times { result << tag.expand }
-        result
-      end
-      c.define_tag 'content' do |tag|
-        number = (tag.attr['times'] || '1').to_i
-        result = ''
-        number.times { result << tag.expand }
-        result
-      end
-      c.define_tag 'hello' do
-        'Hello world'
-      end
-      c.define_tag 'repeat' do |tag|
-        number = (tag.attr['times'] || '1').to_i
-        result = ''
-        number.times { result << tag.expand }
-        result
-      end
-    end
+    @context ||= PageContext.new( @page )
   end
 
 end

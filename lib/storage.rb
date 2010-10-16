@@ -1,7 +1,26 @@
 require File.join(File.dirname(__FILE__), 'root_page.rb')
 require File.join(File.dirname(__FILE__), 'layout.rb')
 
+require File.join(File.dirname(__FILE__), 'taggable.rb')
+require File.join(File.dirname(__FILE__), 'tags.rb')
+require File.join(File.dirname(__FILE__), 'tags/standard_tags.rb')
+
 class Storage
+
+  def initialize
+    @tagger = Object.new
+    @tagger.extend Taggable
+
+    add_tag_library! Tags::StandardTags
+  end
+
+  def add_tag_library!( tag_module )
+    @tagger.extend tag_module
+  end
+
+  def tagger
+    @tagger.clone
+  end
 
   def layout( name )
     @layouts ||= {}
@@ -54,7 +73,7 @@ class Storage
 
       if content_ext? name_parts.last
         if name_parts.size == 1
-          parts[ 'content' ] = part_file
+          parts[ 'body' ] = part_file
         else
           parts[ name_parts.shift ] = part_file
         end
