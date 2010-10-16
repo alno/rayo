@@ -10,38 +10,30 @@ class Root < Page
   end
 
   def directories
-    [ '.' ]
+    [ File.join( File.dirname(__FILE__), '..', 'content' ) ]
   end
 
   def file
-    return @file if defined? @file
-
-    @file = 'index'
-    @file = nil unless File.file?( File.join( absdir, @file ) + page_ext )
-    @file
+    @file ||= find_page_file( directories, 'index' )
   end
 
   def params
     @params ||= {}
   end
 
-  def find_page_file( parent, slug )
-    glob parent, slug, page_ext do |file|
-      return file if File.file?( File.join( absdir, file ) + page_ext )
+  def find_page_file( dirs, slug )
+    glob dirs, slug, page_ext do |file|
+      return file if File.file?( File.join( file ) + page_ext )
     end
     nil
   end
 
-  def find_page_dirs( parent, slug )
+  def find_page_dirs( dirs, slug )
     res = []
-    glob parent, slug, '' do |file|
-      res << file if File.directory?( File.join( absdir, file ) )
+    glob dirs, slug, '' do |file|
+      res << file if File.directory?( File.join( file ) )
     end
     res
-  end
-
-  def absdir
-    File.join( File.dirname(__FILE__), '..', 'content' )
   end
 
   private
@@ -50,11 +42,11 @@ class Root < Page
     '.page'
   end
 
-  def glob( parent, slug, ext )
-    parent.directories.each do |dir|
+  def glob( dirs, slug, ext )
+    dirs.each do |dir|
       yield File.join( dir, slug )
 
-      Dir.glob File.join( absdir, dir, '%*' + ext ) do |file|
+      Dir.glob File.join( dir, '%*' + ext ) do |file|
         yield File.join( dir, File.basename( file, ext ) )
       end
     end

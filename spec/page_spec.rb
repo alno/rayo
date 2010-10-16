@@ -8,23 +8,27 @@ describe Page do
       'index.part'
     end
 
-    def find_page_file( parent, slug )
-      p = parent.path + [slug]
+    def directories
+      [ 'content' ]
+    end
+
+    def find_page_file( dirs, slug )
+      p = dirs.first + '/' + slug
 
       case p
-        when [ 'test' ] then 'test'
-        when [ 'users' ] then 'users'
-        when [ 'users', 'alex' ] then 'users/%name'
+        when File.join( 'content', 'test' ) then File.join( 'content', 'test' )
+        when File.join( 'content', 'users' ) then File.join( 'content', 'users' )
+        when File.join( 'content', 'users', 'alex' ) then File.join( 'content', 'users', '%name' )
       end
     end
 
-    def find_page_dirs( parent, slug )
-      p = parent.path + [slug]
+    def find_page_dirs( dirs, slug )
+      p = dirs.first + '/' + slug
 
       case p
-        when [ 'test' ] then [ 'test' ]
-        when [ 'users' ] then [ 'users' ]
-        when [ 'users', 'alex' ] then [ 'users/%name' ]
+        when File.join( 'content', 'test' ) then [ File.join( 'content', 'test' ) ]
+        when File.join( 'content', 'users' ) then [ File.join( 'content', 'users' ) ]
+        when File.join( 'content', 'users', 'alex' ) then [ File.join( 'content', 'users', '%name' ) ]
         else []
       end
     end

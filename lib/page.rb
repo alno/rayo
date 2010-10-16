@@ -6,6 +6,12 @@ class Page
   attr_accessor :slug # Page slug
   attr_accessor :path # Page path
 
+  attr_accessor :status
+
+  def initialize
+    self.status = 200
+  end
+
   def descendant( relative_path )
     relative_path.inject( self ) {|page,slug| page.child( slug ) }
   end
@@ -19,17 +25,17 @@ class Page
     page.parent = self
     page.slug = slug
     page.path = abs_path || self.path + [slug]
-    page = nil if page.file.nil? && page.directories.empty?
+    page.status = 404 unless page.file # Page not found if there are no file
 
     @children_cache[ slug ] = page
   end
 
   def directories
-    @directories ||= root.find_page_dirs( parent, slug )
+    @directories ||= root.find_page_dirs( parent.directories, slug )
   end
 
   def file
-    @file ||= root.find_page_file( parent, slug )
+    @file ||= root.find_page_file( parent.directories, slug )
   end
 
   def params
@@ -37,10 +43,12 @@ class Page
 
     @params = {}
 
-    segments = file.split(/[\/\\]/)[-path.size..-1] || raise( "File doesn't correspond to path" )
+    if file
+      segments = file.split(/[\/\\]/)[-path.size..-1] || raise( "File doesn't correspond to path" )
 
-    0.upto path.size - 1 do |i|
-      @params[segments[i][1..-1]] = path[i] if segments[i][0..0] == '%'
+      0.upto path.size - 1 do |i|
+        @params[segments[i][1..-1]] = path[i] if segments[i][0..0] == '%'
+      end
     end
 
     @params
