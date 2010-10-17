@@ -1,9 +1,11 @@
 class Models::Renderable
 
   attr_reader :file
+  attr_reader :filter
 
-  def initialize( file )
+  def initialize( file, filter )
     @file = file
+    @filter = filter
   end
 
   def source
@@ -11,7 +13,7 @@ class Models::Renderable
   end
 
   def render( parser )
-    parser.parse( source )
+    filter.call( parser.parse( source ) )
   end
 
 end

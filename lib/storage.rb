@@ -16,11 +16,11 @@ class Storage
   end
 
   def snippet( name )
-    @snipetts[name.to_s] ||= Models::Renderable.new( find_renderable_file( :snippets, name.to_s ) || raise( "Snippet '#{name}' not found" ) )
+    @snipetts[name.to_s] ||= find_renderable_file( :snippets, name.to_s ) || raise( "Snippet '#{name}' not found" )
   end
 
   def layout( name )
-    @layouts[name.to_s] ||= Models::Renderable.new( find_renderable_file( :layouts,  name.to_s ) || raise( "Layout '#{name}' not found" ) )
+    @layouts[name.to_s] ||= find_renderable( :layouts,  name.to_s ) || raise( "Layout '#{name}' not found" )
   end
 
   def root_page
@@ -35,12 +35,14 @@ class Storage
     Models::StatusPage.new( self, root_page, path, status )
   end
 
-  def find_renderable_file( type, name )
-    find_file [config.directory( type )], name, config.renderable_exts
+  def find_renderable( type, name )
+    if file = find_file( [config.directory( type )], name, config.renderable_exts )
+      Models::Renderable.new( file, filter( File.extname( file ) ) )
+    end
   end
 
   def find_page_file( dirs, slug )
-    find_file dirs, slug, config.page_exts
+    find_file( dirs, slug, config.page_exts )
   end
 
   def find_page_dirs( dirs, slug )
@@ -59,12 +61,12 @@ class Storage
 
       if base_parts.shift == page_file_base # Remove base (slug or variable)
         if base_parts.size == 0 # There are no part name and language
-          page_parts[ 'body' ] ||= Models::Renderable.new( file )
+          page_parts[ 'body' ] ||= Models::Renderable.new( file, filter( ext ) )
         elsif base_parts.size == 1 # There are no language or no part name
-          page_parts[ base_parts[0] ] ||= Models::Renderable.new( file )
-          page_parts[ 'body' ] ||= Models::Renderable.new( file ) if base_parts[1] == @lang
+          page_parts[ base_parts[0] ] ||= Models::Renderable.new( file, filter( ext ) )
+          page_parts[ 'body' ] ||= Models::Renderable.new( file, filter( ext ) ) if base_parts[1] == @lang
         else
-          page_parts[ base_parts[0] ] ||= Models::Renderable.new( file ) if base_parts[1] == @lang
+          page_parts[ base_parts[0] ] ||= Models::Renderable.new( file, filter( ext ) ) if base_parts[1] == @lang
         end
       end
     end
@@ -72,6 +74,10 @@ class Storage
   end
 
   private
+
+  def filter( ext )
+    config.filter( ext ) || raise( "Filter for '#{ext} not found" )
+  end
 
   # Find first file with given name (or variable) and extension from given set
   def find_file( dirs, name, exts )

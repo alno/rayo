@@ -6,16 +6,24 @@ require File.join(File.dirname(__FILE__), 'tags/navigation_tags.rb')
 class CmsConfig
 
   def initialize
+    @filters = {}
+
+    register_filter!('html') { |source| source }
+
     @tagger = Object.new
     @tagger.extend Taggable
 
-    add_tag_library! Tags::PropertyTags
-    add_tag_library! Tags::ContentTags
-    add_tag_library! Tags::NavigationTags
+    register_tag_library! Tags::PropertyTags
+    register_tag_library! Tags::ContentTags
+    register_tag_library! Tags::NavigationTags
   end
 
-  def add_tag_library!( tag_module )
+  def register_tag_library!( tag_module )
     @tagger.extend tag_module
+  end
+
+  def register_filter!( ext, &filter )
+    @filters[".#{ext}"] = filter
   end
 
   def tagger
@@ -31,7 +39,11 @@ class CmsConfig
   end
 
   def renderable_exts
-    ['.html']
+    @filters.keys
+  end
+
+  def filter( ext )
+    @filters[ ext.to_s ]
   end
 
   def languages
