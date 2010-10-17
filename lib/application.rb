@@ -24,7 +24,7 @@ class Application < Sinatra::Base
     return redirect_to_lang path unless lang? path.first
 
     lang = path.shift # Determine language
-    storage = Storage.new # Page storage
+    storage = Storage.new( lang ) # Page storage
     page = storage.page( path ) # Find page by path
     page = storage.status_page( path, 404 ) unless page && page.file # Render 404 page if there are no page, or there are no file
 

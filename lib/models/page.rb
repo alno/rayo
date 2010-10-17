@@ -41,7 +41,7 @@ class Models::Page
   end
 
   def parts
-    @parts ||= @storage.find_page_parts( @parent.directories, @path.last )
+    @parts ||= file ? @storage.find_page_parts( file ) : {}
   end
 
   def params

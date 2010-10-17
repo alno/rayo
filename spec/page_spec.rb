@@ -44,7 +44,7 @@ describe Models::Page do
   end
 
   before :each do
-    @root = TestStorage.new.root_page
+    @root = TestStorage.new( 'en' ).root_page
   end
 
   it "should find root page" do

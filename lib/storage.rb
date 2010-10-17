@@ -8,7 +8,10 @@ require File.join(File.dirname(__FILE__), 'tags/navigation_tags.rb')
 
 class Storage
 
-  def initialize
+  def initialize( lang )
+    @lang = lang
+    @lang_prefix = '.' + lang
+
     @layouts = {}
     @snippets = {}
 
@@ -29,15 +32,11 @@ class Storage
   end
 
   def snippet( name )
-    name = name.to_s
-
-    @snipetts[name] ||= Models::Renderable.new( find_renderable_file( :snippets, name ) || raise( "Snippet '#{name}' not found" ) )
+    @snipetts[name.to_s] ||= Models::Renderable.new( find_renderable_file( :snippets, name.to_s ) || raise( "Snippet '#{name}' not found" ) )
   end
 
   def layout( name )
-    name = name.to_s
-
-    @layouts[name] ||= Models::Renderable.new( find_renderable_file( :layouts,  name ) || raise( "Layout '#{name}' not found" ) )
+    @layouts[name.to_s] ||= Models::Renderable.new( find_renderable_file( :layouts,  name.to_s ) || raise( "Layout '#{name}' not found" ) )
   end
 
   def directory( content_type )
@@ -56,84 +55,94 @@ class Storage
     Models::StatusPage.new( self, root_page, path, status )
   end
 
-  def find_pages( dirs )
-    res = []
-    glob dirs, '*', '' do |file|
-      ext = File.extname( file )
-      base = File.basename( file, ext )
-
-      unless base == 'index' && dir == directory(:pages)
-        res << base if valid_page?( base ) && (page_directory?( file ) || page_file?( file ))
-      end
-    end
-    res
-  end
-
   def find_renderable_file( type, name )
-    glob [directory( type )], name, '.*' do |file|
-      return file if renderable_file? file
-    end
-    nil
+    find_file [directory( type )], name, renderable_exts
   end
 
   def find_page_file( dirs, slug )
-    glob dirs, slug, page_ext do |file|
-      return file if page_file? file
-    end
-    nil
+    find_file dirs, slug, page_exts
   end
 
   def find_page_dirs( dirs, slug )
-    res = []
-    glob dirs, slug, '' do |file|
-      res << file if page_directory? file
-    end
-    res
+    find_files dirs, slug, ['']
   end
 
-  def find_page_parts( dirs, slug )
-    parts = {}
-    glob dirs, slug, '.*' do |file|
-      if renderable_file? file
-        name_parts = File.basename( file ).split('.')
-        name_parts.shift # Remove base (slug or param)
+  def find_pages( dirs )
+    find_files dirs, '*', page_exts + ['']
+  end
 
-        if name_parts.size == 1
-          parts[ 'body' ] = Models::Renderable.new( file )
+  def find_page_parts( page_file )
+    page_parts = {}
+    page_file_base = File.basename( page_file, File.extname( page_file ) )
+    glob_files File.dirname( page_file ), page_file_base + '*', renderable_exts do |file,base,ext|
+      base_parts = base.split('.')
+
+      if base_parts.shift == page_file_base # Remove base (slug or variable)
+        if base_parts.size == 0 # There are no part name and language
+          page_parts[ 'body' ] ||= Models::Renderable.new( file )
+        elsif base_parts.size == 1 # There are no language or no part name
+          page_parts[ base_parts[0] ] ||= Models::Renderable.new( file )
+          page_parts[ 'body' ] ||= Models::Renderable.new( file ) if base_parts[1] == @lang
         else
-          parts[ name_parts.shift ] = Models::Renderable.new( file )
+          page_parts[ base_parts[0] ] ||= Models::Renderable.new( file ) if base_parts[1] == @lang
         end
       end
     end
-    parts
+    page_parts
   end
 
   private
 
-  def renderable_file?( file )
-     File.file?( file ) && [ 'html' ].include?( File.extname( file )[1..-1] )
+  def page_exts
+    ['.yml']
   end
 
-  def page_file?( file )
-    File.file?( file ) && File.extname( file ) == page_ext
+  def renderable_exts
+    ['.html']
   end
 
-  def page_directory?( dir )
-    File.directory?( dir ) && File.extname( dir ).empty?
+  # Find first file with given name (or variable) and extension from given set
+  def find_file( dirs, name, exts )
+    glob_files( dirs, name, exts ) { |file,base,ext| return file }
+    nil
   end
 
-  def page_ext
-    '.yml'
+  # Find files with given name (or variable) and extension from given set
+  def find_files( dirs, name, exts )
+    results = []
+    glob_files( dirs, name, exts ) { |file,base,ext| results << file }
+    results
   end
 
-  def valid_page?( name )
-    name  =~ /^[\w\d_-]+$/
+  def glob_files( dirs, name, exts, &block )
+    glob dirs, name + @lang_prefix, //, exts, &block # Search with given name and language
+    glob dirs, name, //, exts, &block # Search with given name without language
+    glob dirs, '%*' + @lang_prefix, /^%.+\.#{@lang}$/, exts, &block # Search with variable and language
+    glob dirs, '%*',  /^%.+$/, exts, &block # Search with variable without language
   end
 
-  def glob( dirs, slug, ext, &block )
+  def glob( dirs, mask_wo_ext, base_regexp, exts )
+    mask = mask_wo_ext + ext_mask( exts )
+
     dirs.each do |dir|
-      Dir.glob( File.join( dir, slug + ext ), &block )
-      Dir.glob( File.join( dir, '%*' + ext ), &block ) if slug != '*'
+      Dir.glob File.join( dir, mask ) do |file|
+        ext = File.extname( file )
+        base = File.basename( file, ext )
+
+        yield file, base, ext if exts.include?( ext ) && base =~ base_regexp
+      end
+    end
+  end
+
+  def ext_mask( exts )
+    if exts.size == 1 # Only one extension
+      exts.first # Use it in mask
+    elsif !exts.include? '' # No empty extension
+      '.*' # Use any extension mask
+    elsif mask_wo_ext[-1..-1] == '*' # Mask ends with star
+      '' # No need for another star
+    else
+      '*' # Any prefix
     end
   end
 
