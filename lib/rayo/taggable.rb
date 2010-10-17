@@ -1,4 +1,4 @@
-module Taggable
+module Rayo::Taggable
 
   module ClassMethods
 

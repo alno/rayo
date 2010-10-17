@@ -1,6 +1,6 @@
 require File.join(File.dirname(__FILE__), 'page.rb')
 
-class Models::StatusPage < Models::Page
+class Rayo::Models::StatusPage < Rayo::Models::Page
 
   def initialize( storage, root, path, status )
     super( storage, root, path )

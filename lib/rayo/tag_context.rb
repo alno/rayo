@@ -1,4 +1,4 @@
-class TagContext < Radius::Context
+class Rayo::TagContext < Radius::Context
 
   attr_reader :page
 
@@ -9,7 +9,7 @@ class TagContext < Radius::Context
 
     globals.page = @page
 
-    tagger = @page.storage.config.tagger
+    tagger = @page.storage.config.create_tagger
     tagger.methods.each do |name|
       define_tag(name[4..-1]) { |tag_binding| tagger.send name, tag_binding } if name[0..3] == 'tag:'
     end

@@ -1,7 +1,7 @@
 require File.join(File.dirname(__FILE__), 'models', 'root_page.rb')
 require File.join(File.dirname(__FILE__), 'models', 'renderable.rb')
 
-class Storage
+class Rayo::Storage
 
   attr_reader :config
 
@@ -24,7 +24,7 @@ class Storage
   end
 
   def root_page
-    @root_page ||= Models::RootPage.new( self )
+    @root_page ||= Rayo::Models::RootPage.new( self )
   end
 
   def page( path )
@@ -32,7 +32,7 @@ class Storage
   end
 
   def status_page( path, status )
-    Models::StatusPage.new( self, root_page, path, status )
+    Rayo::Models::StatusPage.new( self, root_page, path, status )
   end
 
   def find_renderable( type, name )
@@ -76,7 +76,7 @@ class Storage
   private
 
   def renderable( file, ext )
-    Models::Renderable.new( file, config.filter( ext ) || raise( "Filter for '#{ext} not found" ) )
+    Rayo::Models::Renderable.new( file, config.filter( ext ) || raise( "Filter for '#{ext} not found" ) )
   end
 
   # Find first file with given name (or variable) and extension from given set

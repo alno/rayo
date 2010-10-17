@@ -1,6 +1,6 @@
-module Tags::ContentTags
+module Rayo::Tags::ContentTags
 
-  include Taggable
+  include Rayo::Taggable
 
   tag 'content' do |tag|
     part_name = tag.attr['part'] || 'body'

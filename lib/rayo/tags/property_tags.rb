@@ -1,6 +1,6 @@
-module Tags::PropertyTags
+module Rayo::Tags::PropertyTags
 
-  include Taggable
+  include Rayo::Taggable
 
   tag 'title' do |tag|
     tag.locals.page.context['title']

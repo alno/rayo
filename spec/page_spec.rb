@@ -1,8 +1,8 @@
 require File.dirname(__FILE__) + '/spec_helper'
 
-describe Models::Page do
+describe Rayo::Models::Page do
 
-  class TestConfig < CmsConfig
+  class TestConfig < Rayo::Config
 
     def directory( content_type )
       'content'
@@ -10,7 +10,7 @@ describe Models::Page do
 
   end
 
-  class TestRoot < Models::RootPage
+  class TestRoot < Rayo::Models::RootPage
 
     def file
       'index.part'
@@ -18,7 +18,7 @@ describe Models::Page do
 
   end
 
-  class TestStorage < Storage
+  class TestStorage < Rayo::Storage
 
     def root_page
       @root_page ||= TestRoot.new( self )

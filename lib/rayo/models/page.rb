@@ -4,7 +4,7 @@ require 'radius'
 
 require File.join(File.dirname(__FILE__), '..', 'tag_context.rb')
 
-class Models::Page
+class Rayo::Models::Page
 
   attr_reader :storage, :parent, :path
 
@@ -26,7 +26,7 @@ class Models::Page
     @children_cache ||= {}
     return @children_cache[ slug ] if @children_cache.include? slug
 
-    page = Models::Page.new( @storage, self, @path + [slug] )
+    page = Rayo::Models::Page.new( @storage, self, @path + [slug] )
     page = nil if page.file.nil? && page.directories.empty?
 
     @children_cache[ slug ] = page
@@ -82,7 +82,7 @@ class Models::Page
   end
 
   def parser
-    @parser ||= Radius::Parser.new( TagContext.new( self ), :tag_prefix => 'r' )
+    @parser ||= Radius::Parser.new( Rayo::TagContext.new( self ), :tag_prefix => 'r' )
   end
 
   private

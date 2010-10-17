@@ -1,4 +1,4 @@
-class Models::Renderable
+class Rayo::Models::Renderable
 
   attr_reader :file
   attr_reader :filter

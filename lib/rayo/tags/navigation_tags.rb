@@ -1,6 +1,6 @@
-module Tags::NavigationTags
+module Rayo::Tags::NavigationTags
 
-  include Taggable
+  include Rayo::Taggable
 
   tag 'find' do |tag|
     url = tag.attr['url']
