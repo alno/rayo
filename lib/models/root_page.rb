@@ -8,7 +8,7 @@ class Models::RootPage < Models::Page
   end
 
   def directories
-    [ @storage.directory :pages ]
+    [ @storage.config.directory :pages ]
   end
 
   def file

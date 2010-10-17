@@ -1,34 +1,18 @@
 require File.join(File.dirname(__FILE__), 'models', 'root_page.rb')
 require File.join(File.dirname(__FILE__), 'models', 'renderable.rb')
 
-require File.join(File.dirname(__FILE__), 'taggable.rb')
-require File.join(File.dirname(__FILE__), 'tags/property_tags.rb')
-require File.join(File.dirname(__FILE__), 'tags/content_tags.rb')
-require File.join(File.dirname(__FILE__), 'tags/navigation_tags.rb')
-
 class Storage
 
-  def initialize( lang )
+  attr_reader :config
+
+  def initialize( config, lang )
+    @config = config
+
     @lang = lang
     @lang_prefix = '.' + lang
 
     @layouts = {}
     @snippets = {}
-
-    @tagger = Object.new
-    @tagger.extend Taggable
-
-    add_tag_library! Tags::PropertyTags
-    add_tag_library! Tags::ContentTags
-    add_tag_library! Tags::NavigationTags
-  end
-
-  def add_tag_library!( tag_module )
-    @tagger.extend tag_module
-  end
-
-  def tagger
-    @tagger.clone
   end
 
   def snippet( name )
@@ -37,10 +21,6 @@ class Storage
 
   def layout( name )
     @layouts[name.to_s] ||= Models::Renderable.new( find_renderable_file( :layouts,  name.to_s ) || raise( "Layout '#{name}' not found" ) )
-  end
-
-  def directory( content_type )
-    File.join( File.dirname(__FILE__), '..', 'content', content_type.to_s )
   end
 
   def root_page
@@ -56,11 +36,11 @@ class Storage
   end
 
   def find_renderable_file( type, name )
-    find_file [directory( type )], name, renderable_exts
+    find_file [config.directory( type )], name, config.renderable_exts
   end
 
   def find_page_file( dirs, slug )
-    find_file dirs, slug, page_exts
+    find_file dirs, slug, config.page_exts
   end
 
   def find_page_dirs( dirs, slug )
@@ -68,13 +48,13 @@ class Storage
   end
 
   def find_pages( dirs )
-    find_files dirs, '*', page_exts + ['']
+    find_files dirs, '*', config.page_exts + ['']
   end
 
   def find_page_parts( page_file )
     page_parts = {}
     page_file_base = File.basename( page_file, File.extname( page_file ) )
-    glob_files File.dirname( page_file ), page_file_base + '*', renderable_exts do |file,base,ext|
+    glob_files File.dirname( page_file ), page_file_base + '*', config.renderable_exts do |file,base,ext|
       base_parts = base.split('.')
 
       if base_parts.shift == page_file_base # Remove base (slug or variable)
@@ -92,14 +72,6 @@ class Storage
   end
 
   private
-
-  def page_exts
-    ['.yml']
-  end
-
-  def renderable_exts
-    ['.html']
-  end
 
   # Find first file with given name (or variable) and extension from given set
   def find_file( dirs, name, exts )

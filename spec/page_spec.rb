@@ -2,6 +2,14 @@ require File.dirname(__FILE__) + '/spec_helper'
 
 describe Models::Page do
 
+  class TestConfig < CmsConfig
+
+    def directory( content_type )
+      'content'
+    end
+
+  end
+
   class TestRoot < Models::RootPage
 
     def file
@@ -14,10 +22,6 @@ describe Models::Page do
 
     def root_page
       @root_page ||= TestRoot.new( self )
-    end
-
-    def directory( content_type )
-      'content'
     end
 
     def find_page_file( dirs, slug )
@@ -44,7 +48,7 @@ describe Models::Page do
   end
 
   before :each do
-    @root = TestStorage.new( 'en' ).root_page
+    @root = TestStorage.new( TestConfig.new, 'en' ).root_page
   end
 
   it "should find root page" do

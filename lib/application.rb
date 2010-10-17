@@ -9,10 +9,14 @@ module Models
 end
 
 require File.join(File.dirname(__FILE__), 'storage.rb')
+require File.join(File.dirname(__FILE__), 'config.rb')
 
 class Application < Sinatra::Base
 
-  @@langs = ['ru','en']
+  def initialize
+    super
+    @config = CmsConfig.new
+  end
 
   get '/' do
     redirect_to_lang '' # Root page
@@ -28,7 +32,7 @@ class Application < Sinatra::Base
     return redirect_to_lang path unless lang? path.first
 
     lang = path.shift # Determine language
-    storage = Storage.new( lang ) # Page storage
+    storage = Storage.new( @config, lang ) # Page storage
     page = storage.page( path ) # Find page by path
     page = storage.status_page( path, 404 ) unless page && page.file # Render 404 page if there are no page, or there are no file
 
@@ -36,11 +40,11 @@ class Application < Sinatra::Base
   end
 
   def redirect_to_lang( path )
-    redirect [@@langs.first, *path].join '/'
+    redirect [@config.languages.first, *path].join '/'
   end
 
   def lang?( lang )
-    @@langs.include? lang
+    @config.languages.include? lang
   end
 
 end
