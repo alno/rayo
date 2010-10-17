@@ -14,6 +14,10 @@ class Application < Sinatra::Base
 
   @@langs = ['ru','en']
 
+  get '/' do
+    redirect_to_lang '' # Root page
+  end
+
   get '*/' do |path|
     redirect path # Remove trailing slashes
   end
