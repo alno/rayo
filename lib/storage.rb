@@ -37,7 +37,7 @@ class Storage
 
   def find_renderable( type, name )
     if file = find_file( [config.directory( type )], name, config.renderable_exts )
-      Models::Renderable.new( file, filter( File.extname( file ) ) )
+      renderable( file, File.extname( file ) )
     end
   end
 
@@ -54,29 +54,29 @@ class Storage
   end
 
   def find_page_parts( page_file )
-    page_parts = {}
+    parts = {}
     page_file_base = File.basename( page_file, File.extname( page_file ) )
     glob_files File.dirname( page_file ), page_file_base + '*', config.renderable_exts do |file,base,ext|
-      base_parts = base.split('.')
+      elems = base.split('.')
 
-      if base_parts.shift == page_file_base # Remove base (slug or variable)
-        if base_parts.size == 0 # There are no part name and language
-          page_parts[ 'body' ] ||= Models::Renderable.new( file, filter( ext ) )
-        elsif base_parts.size == 1 # There are no language or no part name
-          page_parts[ base_parts[0] ] ||= Models::Renderable.new( file, filter( ext ) )
-          page_parts[ 'body' ] ||= Models::Renderable.new( file, filter( ext ) ) if base_parts[1] == @lang
+      if elems.shift == page_file_base # Remove base (slug or variable)
+        if elems.size == 0 # There are no part name and language
+          parts[ 'body'   ] ||= renderable( file, ext )
+        elsif elems.size == 1 # There are no language or no part name
+          parts[ elems[0] ] ||= renderable( file, ext )
+          parts[ 'body'   ]   ||= renderable( file, ext ) if elems[1] == @lang
         else
-          page_parts[ base_parts[0] ] ||= Models::Renderable.new( file, filter( ext ) ) if base_parts[1] == @lang
+          parts[ elems[0] ] ||= renderable( file, ext ) if elems[1] == @lang
         end
       end
     end
-    page_parts
+    parts
   end
 
   private
 
-  def filter( ext )
-    config.filter( ext ) || raise( "Filter for '#{ext} not found" )
+  def renderable( file, ext )
+    Models::Renderable.new( file, config.filter( ext ) || raise( "Filter for '#{ext} not found" ) )
   end
 
   # Find first file with given name (or variable) and extension from given set
