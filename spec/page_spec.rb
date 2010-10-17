@@ -24,9 +24,9 @@ describe Models::Page do
       p = dirs.first + '/' + slug
 
       case p
-        when File.join( 'content', 'test' ) then File.join( 'content', 'test' )
-        when File.join( 'content', 'users' ) then File.join( 'content', 'users' )
-        when File.join( 'content', 'users', 'alex' ) then File.join( 'content', 'users', '%name' )
+        when File.join( 'content', 'test' ) then File.join( 'content', 'test.yml' )
+        when File.join( 'content', 'users' ) then File.join( 'content', 'users.yml' )
+        when File.join( 'content', 'users', 'alex' ) then File.join( 'content', 'users', '%name.yml' )
       end
     end
 
@@ -57,6 +57,7 @@ describe Models::Page do
     page.should_not be_nil
     page.path.should == ['test']
     page.params.should == { 'path' => ['test'] }
+    page.file.should == File.join( 'content', 'test.yml' )
   end
 
   it "should find page with param" do
@@ -64,6 +65,7 @@ describe Models::Page do
     page.should_not be_nil
     page.path.should == ['users','alex']
     page.params.should == { 'path' => ['users','alex'], 'name' => 'alex' }
+    page.file.should == File.join( 'content', 'users', '%name.yml' )
   end
 
 end

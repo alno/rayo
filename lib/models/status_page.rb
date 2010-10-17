@@ -16,6 +16,10 @@ class Models::StatusPage < Models::Page
     @file ||= @storage.find_page_file( @parent.directories, @status.to_s )
   end
 
+  def parts
+    @parts ||= @storage.find_page_parts( @parent.directories, @status.to_s )
+  end
+
   def context
     return @context if @context
 

@@ -40,10 +40,14 @@ class Models::Page
     @file ||= @storage.find_page_file( @parent.directories, @path.last )
   end
 
+  def parts
+    @parts ||= @storage.find_page_parts( @parent.directories, @path.last )
+  end
+
   def params
     return @params if @params
 
-    segments = file.split(/[\/\\]/)[-@path.size..-1] || raise( "File doesn't correspond to path" )
+    segments = file[0..-(File.extname(file).length+1)].split(/[\/\\]/)[-@path.size..-1] || raise( "File doesn't correspond to path" )
 
     @params = {}
 
@@ -59,12 +63,8 @@ class Models::Page
     return @context if @context
 
     @context = @parent ? @parent.context.merge({ 'status' => 200 }) : { 'status' => 200 }
-    @context.merge! load_context( file + '.yml' ) if file
+    @context.merge! load_context( file ) if file
     @context
-  end
-
-  def parts
-    @parts ||= file ? @storage.find_page_parts( file ) : {}
   end
 
   def layout

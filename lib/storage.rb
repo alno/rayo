@@ -56,31 +56,29 @@ class Storage
     Models::StatusPage.new( self, root_page, path, status )
   end
 
-  def find_renderable_file( type, name )
-    Dir.glob File.join( directory( type ), name.to_s + '.*' ) do |file|
-      return file if File.file?( file ) && content_ext?( File.extname( file )[1..-1] )
-    end
-    nil
-  end
-
   def find_pages( dirs )
     res = []
-    dirs.each do |dir|
-      Dir.glob File.join( dir, '*' ) do |file|
-        ext = File.extname( file )
-        base = File.basename( file, ext )
+    glob dirs, '*', '' do |file|
+      ext = File.extname( file )
+      base = File.basename( file, ext )
 
-        unless base == 'index' && dir == directory(:pages)
-          res << base if valid_page?( base ) && (File.directory?( file ) && ext.empty? || File.file?( file ) && ext == page_ext)
-        end
+      unless base == 'index' && dir == directory(:pages)
+        res << base if valid_page?( base ) && (page_directory?( file ) || page_file?( file ))
       end
     end
     res
   end
 
+  def find_renderable_file( type, name )
+    glob [directory( type )], name, '.*' do |file|
+      return file if renderable_file? file
+    end
+    nil
+  end
+
   def find_page_file( dirs, slug )
     glob dirs, slug, page_ext do |file|
-      return file if File.file?( File.join( file ) + page_ext )
+      return file if page_file? file
     end
     nil
   end
@@ -88,22 +86,22 @@ class Storage
   def find_page_dirs( dirs, slug )
     res = []
     glob dirs, slug, '' do |file|
-      res << file if File.directory?( file )
+      res << file if page_directory? file
     end
     res
   end
 
-  def find_page_parts( file )
+  def find_page_parts( dirs, slug )
     parts = {}
-    Dir.glob file + ".*" do |part_file|
-      name_parts = File.basename( part_file ).split('.')
-      name_parts.shift # Remove base (slug or param)
+    glob dirs, slug, '.*' do |file|
+      if renderable_file? file
+        name_parts = File.basename( file ).split('.')
+        name_parts.shift # Remove base (slug or param)
 
-      if content_ext? name_parts.last
         if name_parts.size == 1
-          parts[ 'body' ] = Models::Renderable.new( part_file )
+          parts[ 'body' ] = Models::Renderable.new( file )
         else
-          parts[ name_parts.shift ] = Models::Renderable.new( part_file )
+          parts[ name_parts.shift ] = Models::Renderable.new( file )
         end
       end
     end
@@ -111,6 +109,18 @@ class Storage
   end
 
   private
+
+  def renderable_file?( file )
+     File.file?( file ) && [ 'html' ].include?( File.extname( file )[1..-1] )
+  end
+
+  def page_file?( file )
+    File.file?( file ) && File.extname( file ) == page_ext
+  end
+
+  def page_directory?( dir )
+    File.directory?( dir ) && File.extname( dir ).empty?
+  end
 
   def page_ext
     '.yml'
@@ -120,17 +130,10 @@ class Storage
     name  =~ /^[\w\d_-]+$/
   end
 
-  def content_ext?( ext )
-    [ 'html' ].include? ext
-  end
-
-  def glob( dirs, slug, ext )
+  def glob( dirs, slug, ext, &block )
     dirs.each do |dir|
-      yield File.join( dir, slug )
-
-      Dir.glob File.join( dir, '%*' + ext ) do |file|
-        yield File.join( dir, File.basename( file, ext ) )
-      end
+      Dir.glob( File.join( dir, slug + ext ), &block )
+      Dir.glob( File.join( dir, '%*' + ext ), &block ) if slug != '*'
     end
   end
 

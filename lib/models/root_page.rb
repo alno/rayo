@@ -15,6 +15,10 @@ class Models::RootPage < Models::Page
     @file ||= @storage.find_page_file( directories, 'index' )
   end
 
+  def parts
+    @parts ||= @storage.find_page_parts( directories, 'index' )
+  end
+
   def params
     @params ||= { 'path' => path }
   end
