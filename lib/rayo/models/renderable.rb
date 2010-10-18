@@ -1,15 +1,17 @@
 class Rayo::Models::Renderable
 
+  attr_reader :storage
   attr_reader :file
   attr_reader :filter
 
-  def initialize( file, filter )
+  def initialize( storage, file, filter )
+    @storage = storage
     @file = file
     @filter = filter
   end
 
   def source
-    @source ||= File.read( file )
+    @source ||= @storage.load( file )
   end
 
   def render( parser )

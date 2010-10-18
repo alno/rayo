@@ -2,74 +2,54 @@ require File.dirname(__FILE__) + '/spec_helper'
 
 describe Rayo::Models::Page do
 
-  class TestConfig < Rayo::Config
-
-    def directory( content_type )
-      'content'
-    end
-
-  end
-
-  class TestRoot < Rayo::Models::RootPage
-
-    def file
-      'index.part'
-    end
-
-  end
-
-  class TestStorage < Rayo::Storage
-
-    def root_page
-      @root_page ||= TestRoot.new( self )
-    end
-
-    def find_page_file( dirs, slug )
-      p = dirs.first + '/' + slug
-
-      case p
-        when File.join( 'content', 'test' ) then File.join( 'content', 'test.yml' )
-        when File.join( 'content', 'users' ) then File.join( 'content', 'users.yml' )
-        when File.join( 'content', 'users', 'alex' ) then File.join( 'content', 'users', '%name.yml' )
-      end
-    end
-
-    def find_page_dirs( dirs, slug )
-      p = dirs.first + '/' + slug
-
-      case p
-        when File.join( 'content', 'test' ) then [ File.join( 'content', 'test' ) ]
-        when File.join( 'content', 'users' ) then [ File.join( 'content', 'users' ) ]
-        when File.join( 'content', 'users', 'alex' ) then [ File.join( 'content', 'users', '%name' ) ]
-        else []
-      end
-    end
-
-  end
-
   before :each do
-    @root = TestStorage.new( TestConfig.new, 'en' ).root_page
+    @config = Rayo::Config.new
+    @config.content_dir = 'content'
+
+    @storage = TestStorage.new @config, 'en'
+    @storage.file path( 'content', 'pages', 'test.yml' ), ''
+    @storage.file path( 'content', 'pages', 'users.yml' ), ''
+    @storage.file path( 'content', 'pages', 'users', '%name.yml' ), ''
+
+    @root = @storage.root_page
   end
 
-  it "should find root page" do
-    @root.descendant([]).should_not be_nil
-    @root.descendant([]).path.should == []
+  context "'/'" do
+
+    it { @root.descendant([]).should == @root }
+    it { @root.path.should == [] }
+    it { @root.should have(2).children }
+
   end
 
-  it "should find nested page" do
-    page = @root.descendant(['test'])
-    page.should_not be_nil
-    page.path.should == ['test']
-    page.params.should == { 'path' => ['test'] }
-    page.file.should == File.join( 'content', 'test.yml' )
+  context "'/test'" do
+
+    before { @page = @root.descendant(['test']) }
+
+    specify { @page.should_not be_nil }
+    specify { @page.path.should == ['test'] }
+    specify { @page.params.should == { 'path' => ['test'] } }
+    specify { @page.file.should == path( 'content', 'pages', 'test.yml' ) }
   end
 
-  it "should find page with param" do
-    page = @root.descendant(['users','alex'])
-    page.should_not be_nil
-    page.path.should == ['users','alex']
-    page.params.should == { 'path' => ['users','alex'], 'name' => 'alex' }
-    page.file.should == File.join( 'content', 'users', '%name.yml' )
+  context "'/users'" do
+
+    before { @page = @root.descendant(['users']) }
+
+    specify { @page.should have(0).children }
+
+  end
+
+  context "'/users/alex'" do
+
+    before { @page = @root.descendant(['users','alex']) }
+
+    specify { @page.should_not be_nil }
+    specify { @page.path.should == ['users','alex'] }
+    specify { @page.params.should == { 'path' => ['users','alex'], 'name' => 'alex' } }
+    specify { @page.file.should == path( 'content', 'pages', 'users', '%name.yml' ) }
+    specify { @page.should have(0).children }
+
   end
 
 end

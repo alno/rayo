@@ -7,7 +7,7 @@ class Rayo::Application < Sinatra::Base
 
   class << self
 
-    attr_accessor :config # Application configuration object
+    attr_accessor :config
 
     # Configure application
     def configure
@@ -34,7 +34,7 @@ class Rayo::Application < Sinatra::Base
     return redirect_to_lang path unless config.languages.include? path.first
 
     lang = path.shift # Determine language
-    storage = Rayo::Storage.new( config, lang ) # Page storage
+    storage = create_storage( lang ) # Page storage
     page = storage.page( path ) # Find page by path
     page = storage.status_page( path, 404 ) unless page && page.file # Render 404 page if there are no page, or there are no file
 
@@ -42,6 +42,10 @@ class Rayo::Application < Sinatra::Base
   end
 
   private
+
+  def create_storage( lang )
+    Rayo::Storage.new( config, lang )
+  end
 
   def select_language
     config.languages.first

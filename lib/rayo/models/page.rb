@@ -88,7 +88,7 @@ class Rayo::Models::Page
   private
 
   def load_context( filename )
-    YAML::load( Erubis::Eruby.new( File.read( filename ) ).result( params ) )
+    YAML::load( Erubis::Eruby.new( @storage.load( filename ) ).result( params ) )
   end
 
 end

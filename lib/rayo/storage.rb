@@ -73,10 +73,14 @@ class Rayo::Storage
     parts
   end
 
+  def load( file )
+    File.read( file )
+  end
+
   private
 
   def renderable( file, ext )
-    Rayo::Models::Renderable.new( file, config.filter( ext ) || raise( "Filter for '#{ext} not found" ) )
+    Rayo::Models::Renderable.new( self, file, config.filter( ext ) || raise( "Filter for '#{ext} not found" ) )
   end
 
   # Find first file with given name (or variable) and extension from given set
@@ -100,10 +104,10 @@ class Rayo::Storage
   end
 
   def glob( dirs, mask_wo_ext, base_regexp, exts )
-    mask = mask_wo_ext + ext_mask( exts )
+    mask = mask_wo_ext + ext_mask( mask_wo_ext, exts )
 
     dirs.each do |dir|
-      Dir.glob File.join( dir, mask ) do |file|
+      dir_glob File.join( dir, mask ) do |file|
         ext = File.extname( file )
         base = File.basename( file, ext )
 
@@ -112,7 +116,11 @@ class Rayo::Storage
     end
   end
 
-  def ext_mask( exts )
+  def dir_glob( mask, &block )
+    Dir.glob &block
+  end
+
+  def ext_mask( mask_wo_ext, exts )
     if exts.size == 1 # Only one extension
       exts.first # Use it in mask
     elsif !exts.include? '' # No empty extension

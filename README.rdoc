@@ -118,6 +118,7 @@ And register it:
 
 * Support for sites without I18n
 * Drop-in tag libary support
+* Support for pages without .yml
 * Support for multi-domain sites
 * Generator which creates a set of static pages from content structure
 
