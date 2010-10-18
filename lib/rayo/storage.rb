@@ -121,7 +121,7 @@ class Rayo::Storage
   end
 
   def dir_glob( mask, &block )
-    Dir.glob &block
+    Dir.glob mask, &block
   end
 
   def ext_mask( mask_wo_ext, exts )

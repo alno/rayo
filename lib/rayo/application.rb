@@ -20,18 +20,13 @@ class Rayo::Application < Sinatra::Base
     self.class.config
   end
 
-  get '/' do
-    redirect_to_lang '' # Root page
-  end
-
-  get '*/' do |path|
-    redirect path # Remove trailing slashes
-  end
-
   get '/*' do |path|
     path = path.split '/' # Split path into segments
 
+    empty_segments_found = path.reject! {|e| e.empty? } # Clear path and detect empty segments
+
     return redirect_to_lang path unless config.languages.include? path.first
+    return redirect path.join '/' if empty_segments_found
 
     lang = path.shift # Determine language
     storage = create_storage( lang ) # Page storage

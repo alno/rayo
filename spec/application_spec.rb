@@ -44,4 +44,22 @@ describe "Multilingual application" do
     last_response.body.should == '<html><title>Users</title><body>Example content: </body></html>'
   end
 
+  it "should respond to /en/users" do
+    get '/en/users/alex'
+    last_response.should be_ok
+    last_response.body.should == '<html><title>alex\'s page</title><body>Example content: </body></html>'
+  end
+
+  it "should redirect from / to /en" do
+    get '/'
+    last_response.should be_redirect
+    last_response.location.should == 'en'
+  end
+
+  it "should redirect from /test to /en/test" do
+    get '/test'
+    last_response.should be_redirect
+    last_response.location.should == 'en/test'
+  end
+
 end
