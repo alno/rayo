@@ -50,7 +50,11 @@ class Rayo::Storage
   end
 
   def find_pages( dirs )
-    find_files dirs, '*', config.page_exts + ['']
+    res = []
+    glob_files dirs, '*', config.page_exts + [''] do |file,base,ext|
+      res << file[0..-ext.size-1] unless base[0..0] == '%'
+    end
+    res.uniq
   end
 
   def find_page_parts( page_file )
