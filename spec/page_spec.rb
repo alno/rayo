@@ -19,6 +19,7 @@ describe Rayo::Models::Page do
     it { @root.descendant([]).should == @root }
     it { @root.path.should == [] }
     it { @root.should have(2).children }
+    it { @root.children.each {|p| p.should_not be_nil } }
 
   end
 
@@ -30,6 +31,9 @@ describe Rayo::Models::Page do
     specify { @page.path.should == ['test'] }
     specify { @page.params.should == { 'path' => ['test'] } }
     specify { @page.file.should == path( 'content', 'pages', 'test.yml' ) }
+
+    specify { @page.should have(0).children }
+
   end
 
   context "'/users'" do
