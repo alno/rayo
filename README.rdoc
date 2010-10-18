@@ -23,8 +23,8 @@ To create basic Rayo-based application all you need is Rackup file (config.ru) w
   class Application < Rayo::Application
 
     configure do |c|
-      c.content_dir = File.join( File.dirname(__FILE__), 'content' )
-      c.languages = ['en','ru']
+      c.content_dir = File.join( File.dirname(__FILE__), 'content' ) # Content location
+      c.languages = ['en','ru'] # Supported languages
     end
 
   end
@@ -34,7 +34,7 @@ To create basic Rayo-based application all you need is Rackup file (config.ru) w
 == Content structure
 
 Here we create our application by extending Rayo::Application class, set content directory location and supported languages.
-Content should be placed in @content@ subdirectories similar to following scheme:
+Content should be placed in <tt>content</tt> subdirectories similar to following scheme:
 
   content
   + layouts
@@ -52,7 +52,7 @@ Content should be placed in @content@ subdirectories similar to following scheme
       + subpage.yml
       + subpage.html
 
-There are example layout, snippet and 3 pages: @index@, @section@ and @section/subpage@. Index page contains additional page part @sidebar@, wchih is translated to English and Russian.
+There are example layout, snippet and 3 pages: <tt>index</tt>, <tt>section</tt> and <tt>section/subpage</tt>. Index page contains additional page part <tt>sidebar</tt>, wchih is translated to English and Russian.
 It should be noticed what each page have corresponding .yml file. This file contains page properties which should be used in page rendering.
 
 === Generic pages
@@ -76,7 +76,45 @@ You may create generic pages which are rendered for a set of different paths. Fo
 
 === Filters
 
-== Planned filters
+== Configuration
+
+Configuration options are provided in <tt>configure</tt> block in application class:
+
+  configure do |c|
+    c.content_dir = File.join( File.dirname(__FILE__), 'content' ) # Content location
+    c.languages = ['en','ru'] # Supported languages
+  end
+
+Besides of these options you append your filters for processing content (after expanding radius tags):
+
+  c.add_filter 'textile' do |source|
+    RedCloth.new( source ).to_html
+  end
+
+Also, you may define modules which contain tag definitions:
+
+  module MyTags
+
+    include Rayo::Taggable
+
+    tag 'hello' do
+      'Hello world'
+    end
+
+    tag 'repeat' do |tag|
+      number = (tag.attr['times'] || '1').to_i
+      result = ''
+      number.times { result << tag.expand }
+      result
+    end
+
+  end
+
+And register it:
+
+  c.add_tags MyTags
+
+== Planned features
 
 * Support for sites without I18n
 * Drop-in tag libary support
