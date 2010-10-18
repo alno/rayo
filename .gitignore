@@ -1,3 +1,6 @@
 .project
 .loadpath
 .settings
+.yardoc
+doc
+*.gem

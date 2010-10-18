@@ -1,0 +1,92 @@
+= Rayo
+
+Rayo is a CMS based on lightweight {Sinatra framework}[http://www.sinatrarb.com/] and {Radius gem}[http://radius.rubyforge.org/]. It was inspired by {Radiant}[http://radiantcms.org/], very powerful ROR-based CMS.
+
+<b>Caution! The project in a very early stage of development!</b>
+
+== Installation
+
+Install rayo gem (recommended):
+
+  sudo gem install irwi
+
+Or clone it:
+
+  git clone git://github.com/alno/rayo
+
+== Rack application
+
+To create basic Rayo-based application all you need is Rackup file (config.ru) with content similar to:
+
+  require '../rayo/lib/rayo.rb'
+
+  class Application < Rayo::Application
+
+    configure do |c|
+      c.content_dir = File.join( File.dirname(__FILE__), 'content' )
+      c.languages = ['en','ru']
+    end
+
+  end
+
+  run Application
+
+== Content structure
+
+Here we create our application by extending Rayo::Application class, set content directory location and supported languages.
+Content should be placed in @content@ subdirectories similar to following scheme:
+
+  content
+  + layouts
+    + base.html
+  + snippets
+    + footer.html
+  + pages
+    + index.yml
+    + index.html
+    + index.sidebar.ru.html
+    + index.sidebar.en.html
+    + section.yml
+    + section.html
+    + section
+      + subpage.yml
+      + subpage.html
+
+There are example layout, snippet and 3 pages: @index@, @section@ and @section/subpage@. Index page contains additional page part @sidebar@, wchih is translated to English and Russian.
+It should be noticed what each page have corresponding .yml file. This file contains page properties which should be used in page rendering.
+
+=== Generic pages
+
+You may create generic pages which are rendered for a set of different paths. For example to create archive pages in blog you may use:
+
+  pages
+  + 2010
+  | + 09
+  |   + my-first-post.yml
+  |   + my-first-post.html
+  + %year.yml
+  + %year.html
+  + %year
+    + %month.yml
+    + %month.html
+
+== Content formatting
+
+=== Built-In Tags
+
+=== Filters
+
+== Planned filters
+
+* Support for sites without I18n
+* Drop-in tag libary support
+* Support for multi-domain sites
+* Generator which creates a set of static pages from content structure
+
+== Contributors
+
+* Alexey Noskov (http://github.com/alno)
+
+Feel free to add yourself when you add new features.
+
+Copyright (c) 2010 Alexey Noskov, released under the MIT license

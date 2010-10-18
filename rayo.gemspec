@@ -17,11 +17,21 @@ Gem::Specification.new do |s|
   s.add_dependency "radius"
   s.add_dependency "sinatra", ">=1.0"
 
-  # If you need to check in files that aren't .rb files, add them here
-  s.files = Dir["{lib}/**/*.rb", "bin/*", "LICENSE"]
+  # Development dependencies
+  s.add_development_dependency "rspec", ">=2.0"
+  s.add_development_dependency "rack-test"
+
+  # Gem files
+  s.files = Dir["lib/**/*.rb", "bin/*", "MIT-LICENSE", "README.rdoc"]
+  s.extra_rdoc_files = [ "README.rdoc", "MIT-LICENSE"]
   s.require_path = 'lib'
 
-  # If you need an executable, add it here
+  # Gem executables
   # s.executables = ["newgem"]
+
+  # Info
+  s.has_rdoc = true
+  s.homepage = "http://github.com/alno/rayo"
+  s.rdoc_options = ["--line-numbers", "--inline-source", "--title", "Rayo CMS", "--main", "README.rdoc"]
 
 end
