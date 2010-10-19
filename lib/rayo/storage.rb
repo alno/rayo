@@ -16,7 +16,7 @@ class Rayo::Storage
   end
 
   def snippet( name )
-    @snipetts[name.to_s] ||= find_renderable_file( :snippets, name.to_s ) || raise( "Snippet '#{name}' not found" )
+    @snippets[name.to_s] ||= find_renderable( :snippets, name.to_s ) || raise( "Snippet '#{name}' not found" )
   end
 
   def layout( name )

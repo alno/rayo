@@ -117,6 +117,7 @@ And register it:
 == Planned features
 
 * Support for sites without I18n
+* Support for different page formats
 * Drop-in tag libary support
 * Support for pages without .yml
 * Support for multi-domain sites

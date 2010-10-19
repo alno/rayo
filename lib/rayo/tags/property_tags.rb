@@ -22,4 +22,8 @@ module Rayo::Tags::PropertyTags
     "<a href=\"#{send 'tag:path', tag}\">#{tag.locals.page.context['title']}</a>"
   end
 
+  tag 'date' do |tag|
+    Time.now.strftime(tag.attr['format'] || '%A, %B %d, %Y')
+  end
+
 end

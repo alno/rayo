@@ -26,10 +26,14 @@ module Rayo::Tags::ContentTags
   end
 
   tag 'snippet' do |tag|
-    number = (tag.attr['times'] || '1').to_i
-    result = ''
-    number.times { result << tag.expand }
-    result
+    snippet_name = tag.attr['name']
+    snippet = tag.globals.storage.snippet( snippet_name )
+
+    if snippet
+      snippet.render( tag.globals.page.parser )
+    else
+      error "No snippet '#{snippet_name}' found"
+    end
   end
 
   tag 'hello' do
