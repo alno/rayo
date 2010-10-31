@@ -26,7 +26,7 @@ class Rayo::Application < Sinatra::Base
     empty_segments_found = path.reject! {|e| e.empty? } # Clear path and detect empty segments
 
     return redirect_to_lang path unless config.languages.include? path.first
-    return redirect path.join '/' if empty_segments_found
+    return redirect '/' + path.join('/') if empty_segments_found
 
     lang = path.shift # Determine language
     storage = create_storage( lang ) # Page storage
@@ -47,7 +47,7 @@ class Rayo::Application < Sinatra::Base
   end
 
   def redirect_to_lang( path )
-    redirect [select_language, *path].join '/'
+    redirect '/' + [ select_language, *path].join('/')
   end
 
 end

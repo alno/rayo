@@ -54,13 +54,19 @@ describe "Multilingual application" do
   it "should redirect from / to /en" do
     get '/'
     last_response.should be_redirect
-    last_response.location.should == 'en'
+    last_response.location.should == '/en'
   end
 
   it "should redirect from /test to /en/test" do
     get '/test'
     last_response.should be_redirect
-    last_response.location.should == 'en/test'
+    last_response.location.should == '/en/test'
+  end
+
+  it "should redirect from /test/ttt to /en/test/ttt" do
+    get '/test/ttt'
+    last_response.should be_redirect
+    last_response.location.should == '/en/test/ttt'
   end
 
 end
