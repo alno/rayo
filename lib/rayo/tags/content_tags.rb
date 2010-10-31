@@ -6,7 +6,7 @@ module Rayo::Tags::ContentTags
     if part = find_part( tag )
       part.render( tag.globals.page.parser )
     else
-      error "No part '#{tag.attr['part'] || 'body'}' found for page '#{tag.locals.page.path}'"
+      error "No part '#{tag.attr['part'] || 'body'}' found for page '#{tag.locals.page.path.join('/')}'"
     end
   end
 

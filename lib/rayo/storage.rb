@@ -52,7 +52,11 @@ class Rayo::Storage
   def find_pages( dirs )
     res = []
     glob_files dirs, '*', config.page_exts + [''] do |file,base,ext|
-      res << base unless base[0..0] == '%' || (dirs == root_page.directories && (base == 'index' || base =~ /^\d+$/ ))
+      elems = base.split('.')
+      name = elems[0]
+      lang = elems[1]
+
+      res << name unless name[0..0] == '%' || (dirs == root_page.directories && (name == 'index' || name =~ /^\d+$/ )) || (lang && lang != @lang)
     end
     res.uniq
   end

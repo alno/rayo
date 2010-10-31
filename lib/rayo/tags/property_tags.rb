@@ -11,15 +11,15 @@ module Rayo::Tags::PropertyTags
   end
 
   tag 'path' do |tag|
-    curpath = tag.globals.page.path
+    basepath = tag.globals.page.path[0..-2]
     path = tag.locals.page.path
 
     i = 0
-    while i < path.size && i < curpath.size && path[i] == curpath[i] do
+    while i < path.size && i < basepath.size && path[i] == basepath[i] do
       i = i + 1
     end
 
-    '../' * (curpath.size - i) + path[i..-1].join('/')
+    '../' * (basepath.size - i) + path[i..-1].join('/')
   end
 
   tag 'link' do |tag|

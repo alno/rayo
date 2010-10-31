@@ -28,6 +28,7 @@ describe Rayo::Models::Page do
     it { @root.path.should == [] }
     it { @root.should have(4).children }
     it { @root.children.each {|p| p.should_not be_nil } }
+    it { @root.children.map(&:path).should == [['test3'],['test2'],['users'],['test']] }
 
   end
 
