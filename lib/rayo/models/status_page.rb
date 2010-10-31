@@ -20,7 +20,7 @@ class Rayo::Models::StatusPage < Rayo::Models::Page
     return @context if @context
 
     @context = @parent ? @parent.context.merge({ 'status' => @status }) : { 'status' => @status }
-    @context.merge! load_context( file + '.yml' ) if file
+    @context.merge! load_context( file ) if file
     @context
   end
 

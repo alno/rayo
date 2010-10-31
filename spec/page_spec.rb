@@ -12,7 +12,7 @@ describe Rayo::Models::Page do
     @storage.file path( 'content', 'pages', 'test.footer.html' ), ''
     @storage.file path( 'content', 'pages', 'users.yml' ), ''
     @storage.file path( 'content', 'pages', 'users', '%name.yml' ), ''
-    @storage.file path( 'content', 'pages', '404.yml' ), ''
+    @storage.file path( 'content', 'pages', '404.yml' ), 'title: Not found'
     @storage.file path( 'content', 'pages', '404.html' ), ''
 
     @root = @storage.root_page
@@ -70,6 +70,7 @@ describe Rayo::Models::Page do
     specify { @page.should_not be_nil }
     specify { @page.path.should == ['unknown_page'] }
     specify { @page.params.should == { 'path' => ['unknown_page'] } }
+    specify { @page.context.should == { 'status' => 404, 'title' => 'Not found' } }
     specify { @page.file.should == path( 'content', 'pages', '404.yml' ) }
     specify { @page.should have(0).children }
     specify { @page.should have(1).parts }
