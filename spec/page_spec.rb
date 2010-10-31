@@ -8,8 +8,12 @@ describe Rayo::Models::Page do
 
     @storage = TestStorage.new @config, 'en'
     @storage.file path( 'content', 'pages', 'test.yml' ), ''
+    @storage.file path( 'content', 'pages', 'test.html' ), ''
+    @storage.file path( 'content', 'pages', 'test.footer.html' ), ''
     @storage.file path( 'content', 'pages', 'users.yml' ), ''
     @storage.file path( 'content', 'pages', 'users', '%name.yml' ), ''
+    @storage.file path( 'content', 'pages', '404.yml' ), ''
+    @storage.file path( 'content', 'pages', '404.html' ), ''
 
     @root = @storage.root_page
   end
@@ -33,6 +37,9 @@ describe Rayo::Models::Page do
     specify { @page.file.should == path( 'content', 'pages', 'test.yml' ) }
 
     specify { @page.should have(0).children }
+    specify { @page.should have(2).parts }
+    specify { @page.parts.should include 'body' }
+    specify { @page.parts.should include 'footer' }
 
   end
 
@@ -53,6 +60,20 @@ describe Rayo::Models::Page do
     specify { @page.params.should == { 'path' => ['users','alex'], 'name' => 'alex' } }
     specify { @page.file.should == path( 'content', 'pages', 'users', '%name.yml' ) }
     specify { @page.should have(0).children }
+
+  end
+
+  context "'/unknown_page'" do
+
+    before { @page = @storage.status_page(['unknown_page'],404) }
+
+    specify { @page.should_not be_nil }
+    specify { @page.path.should == ['unknown_page'] }
+    specify { @page.params.should == { 'path' => ['unknown_page'] } }
+    specify { @page.file.should == path( 'content', 'pages', '404.yml' ) }
+    specify { @page.should have(0).children }
+    specify { @page.should have(1).parts }
+    specify { @page.parts.should include 'body' }
 
   end
 
