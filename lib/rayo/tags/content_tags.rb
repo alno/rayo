@@ -3,26 +3,38 @@ module Rayo::Tags::ContentTags
   include Rayo::Taggable
 
   tag 'content' do |tag|
-    part_name = tag.attr['part'] || 'body'
-    inherit = tag.attr['inherit'] == 'true'
-
-    page = tag.locals.page
-    part = page.parts[part_name]
-
-    while inherit && !part && page.parent do
-      page = page.parent
-      part = page.parts[part_name]
-    end
-
-    if part
+    if part = find_part( tag )
       part.render( tag.globals.page.parser )
     else
-      error "No part '#{part_name}' found for page '#{tag.locals.page.path}'"
+      error "No part '#{tag.attr['part'] || 'body'}' found for page '#{tag.locals.page.path}'"
     end
   end
 
+  tag 'if_content' do |tag|
+    find_part( tag ) && tag.expand || ''
+  end
+
   tag 'content_for_layout' do |tag|
-    send 'tag:content', tag
+    tag.globals.content_stack ||= [] # Prepare the stacks
+    tag.globals.content_stack.pop || send( 'tag:content', tag )
+  end
+
+  tag 'layout' do |tag|
+    if name = tag.attr['name'].strip
+      tag.globals.layout_stack ||= [] # Prepare layout stack
+      tag.globals.content_stack ||= [] # Prepare content stack
+
+      if layout = tag.globals.storage.layout( name )
+        tag.globals.layout_stack << name # Track this layout on the stack
+        tag.globals.content_stack << tag.expand # Save contents of inside_layout for later insertion
+
+        layout.render( tag.globals.page.parser )
+      else
+        error "Parent layout '#{name.strip}' not found for 'layout' tag"
+      end
+    else
+      error "'layout' tag must contain a 'name' attribute"
+    end
   end
 
   tag 'snippet' do |tag|
@@ -36,15 +48,10 @@ module Rayo::Tags::ContentTags
     end
   end
 
-  tag 'hello' do
-     'Hello world'
-  end
+  private
 
-  tag 'repeat' do |tag|
-    number = (tag.attr['times'] || '1').to_i
-    result = ''
-    number.times { result << tag.expand }
-    result
+  def find_part( tag )
+    tag.locals.page.find_part( tag.attr['part'] || 'body', tag.attr['inherit'] == 'true' )
   end
 
 end

@@ -19,13 +19,13 @@ class Rayo::TagContext < Radius::Context
   def render_tag(name, attributes = {}, &block)
     super
   rescue Exception => e
-    error(e.message)
+    error("#{e.message} <pre>#{e.backtrace.join("\n")}</pre>")
   end
 
   def tag_missing(name, attributes = {}, &block)
     super
   rescue Radius::UndefinedTagError => e
-    error(e.message)
+    error("#{e.message} <pre>#{e.backtrace.join("\n")}</pre>")
   end
 
   def error( text )

@@ -44,6 +44,18 @@ class Rayo::Models::Page
     @parts ||= file ? @storage.find_page_parts( file ) : {}
   end
 
+  def find_part( part_name, inherit = false )
+    page = self
+    part = self.parts[part_name]
+
+    while inherit && !part && page.parent do
+      page = page.parent
+      part = page.parts[part_name]
+    end
+
+    part
+  end
+
   def params
     return @params if @params
 

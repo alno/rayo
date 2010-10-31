@@ -68,7 +68,7 @@ class Rayo::Storage
           parts[ 'body'   ] ||= renderable( file, ext )
         elsif elems.size == 1 # There are no language or no part name
           if elems[0] == @lang
-            parts[ 'body'   ] ||= renderable( file, ext ) 
+            parts[ 'body'   ] ||= renderable( file, ext )
           else
             parts[ elems[0] ] ||= renderable( file, ext )
           end
