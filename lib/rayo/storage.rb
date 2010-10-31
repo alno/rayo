@@ -59,7 +59,7 @@ class Rayo::Storage
 
   def find_page_parts( page_file )
     parts = {}
-    page_file_base = File.basename( page_file, File.extname( page_file ) )
+    page_file_base = File.basename( page_file ).split('.').first
     glob_files File.dirname( page_file ), page_file_base + '*', config.renderable_exts do |file,base,ext|
       elems = base.split('.')
 
@@ -67,8 +67,11 @@ class Rayo::Storage
         if elems.size == 0 # There are no part name and language
           parts[ 'body'   ] ||= renderable( file, ext )
         elsif elems.size == 1 # There are no language or no part name
-          parts[ elems[0] ] ||= renderable( file, ext )
-          parts[ 'body'   ]   ||= renderable( file, ext ) if elems[1] == @lang
+          if elems[0] == @lang
+            parts[ 'body'   ] ||= renderable( file, ext ) 
+          else
+            parts[ elems[0] ] ||= renderable( file, ext )
+          end
         else
           parts[ elems[0] ] ||= renderable( file, ext ) if elems[1] == @lang
         end

@@ -9,6 +9,10 @@ describe Rayo::Models::Page do
     @storage = TestStorage.new @config, 'en'
     @storage.file path( 'content', 'pages', 'test.yml' ), ''
     @storage.file path( 'content', 'pages', 'test.html' ), ''
+    @storage.file path( 'content', 'pages', 'test2.en.yml' ), ''
+    @storage.file path( 'content', 'pages', 'test2.html' ), ''
+    @storage.file path( 'content', 'pages', 'test3.en.yml' ), ''
+    @storage.file path( 'content', 'pages', 'test3.en.html' ), ''
     @storage.file path( 'content', 'pages', 'test.footer.html' ), ''
     @storage.file path( 'content', 'pages', 'users.yml' ), ''
     @storage.file path( 'content', 'pages', 'users', '%name.yml' ), ''
@@ -22,7 +26,7 @@ describe Rayo::Models::Page do
 
     it { @root.descendant([]).should == @root }
     it { @root.path.should == [] }
-    it { @root.should have(2).children }
+    it { @root.should have(4).children }
     it { @root.children.each {|p| p.should_not be_nil } }
 
   end
@@ -40,6 +44,36 @@ describe Rayo::Models::Page do
     specify { @page.should have(2).parts }
     specify { @page.parts.should include 'body' }
     specify { @page.parts.should include 'footer' }
+
+  end
+
+  context "'/test2'" do
+
+    before { @page = @root.descendant(['test2']) }
+
+    specify { @page.should_not be_nil }
+    specify { @page.path.should == ['test2'] }
+    specify { @page.params.should == { 'path' => ['test2'] } }
+    specify { @page.file.should == path( 'content', 'pages', 'test2.en.yml' ) }
+
+    specify { @page.should have(0).children }
+    specify { @page.should have(1).parts }
+    specify { @page.parts.should include 'body' }
+
+end
+
+  context "'/test3'" do
+
+    before { @page = @root.descendant(['test3']) }
+
+    specify { @page.should_not be_nil }
+    specify { @page.path.should == ['test3'] }
+    specify { @page.params.should == { 'path' => ['test3'] } }
+    specify { @page.file.should == path( 'content', 'pages', 'test3.en.yml' ) }
+
+    specify { @page.should have(0).children }
+    specify { @page.should have(1).parts }
+    specify { @page.parts.should include 'body' }
 
   end
 
