@@ -23,7 +23,7 @@ module Rayo::Tags::PropertyTags
   end
 
   tag 'link' do |tag|
-    "<a href=\"#{send 'tag:path', tag}\">#{send 'tag:title', tag}</a>"
+    "<a href=\"#{send 'tag:path', tag}\">#{tag.single? ? send( 'tag:title', tag ) : tag.expand}</a>"
   end
 
   tag 'if_url' do |tag|
