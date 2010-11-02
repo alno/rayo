@@ -8,7 +8,7 @@ Gem::Specification.new do |s|
   s.email = ["alexey.noskov@gmail.com"]
   s.homepage = "http://github.com/alno/rayo"
   s.summary = "Lightweight CMS based on Sinatra and Radius"
-  s.description = "It's lightweight CMS based on Sinatra framework, where data are stored in file system (so you may use Git power) and enhanced Radius gem."
+  s.description = "Lightweight CMS based on Sinatra framework, where data are stored in file system (and so may be Git-powered) and enhanced using Radius gem."
 
   s.required_rubygems_version = ">= 1.3.6"
 
