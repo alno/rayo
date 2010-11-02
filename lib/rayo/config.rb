@@ -14,6 +14,7 @@ class Rayo::Config
     @page_exts = ['.yml']
 
     @filters = {}
+    @domains = {}
 
     # Default filters
     add_filter('html'){|source| source }
@@ -28,13 +29,26 @@ class Rayo::Config
   end
 
   # Add tags defined in module
+  #
+  # @param [Module] module defining tags to use
   def add_tags( tag_module )
     @tagger.extend tag_module
   end
 
   # Add filter
+  #
+  # @param [String,Symbol] file extension
+  # @param [Proc] filter proc which accepts source and return it in processed form
   def add_filter( ext, &filter )
     @filters[".#{ext}"] = filter
+  end
+
+  # Add domain
+  #
+  # @param [String] domain name
+  # @param [Regexp,String] host pattern
+  def add_domain( name, exp = nil )
+    @domains[ name.to_s ] = Rayo::Config::Domain.new( self, name, exp || name )
   end
 
   # Create new object containing all defined tags
@@ -54,4 +68,16 @@ class Rayo::Config
     @filters[ ext.to_s ]
   end
 
+  def domain( host )
+    return self if @domains.empty?
+
+    @domains.each do |name, domain|
+      return domain if domain.matches? host
+    end
+
+    nil
+  end
+
 end
+
+require File.join(File.dirname(__FILE__), 'config/domain.rb')

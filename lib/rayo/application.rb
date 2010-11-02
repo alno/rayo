@@ -21,25 +21,32 @@ class Rayo::Application < Sinatra::Base
   end
 
   get '/*' do |path|
-    path = path.split '/' # Split path into segments
+    cfg = config.domain( request.host ) # Config for current host
 
-    empty_segments_found = path.reject! {|e| e.empty? } # Clear path and detect empty segments
+    if cfg
+      path = path.split '/' # Split path into segments
 
-    return redirect_to_lang path unless config.languages.include? path.first
-    return redirect '/' + path.join('/') if empty_segments_found
+      empty_segments_found = path.reject! {|e| e.empty? } # Clear path and detect empty segments
 
-    lang = path.shift # Determine language
-    storage = create_storage # Page storage
-    page = storage.page( lang, path ) # Find page by path
-    page = storage.status_page( lang, path, 404 ) unless page && page.file # Render 404 page if there are no page, or there are no file
+      return redirect_to_lang path unless config.languages.include? path.first
+      return redirect '/' + path.join('/') if empty_segments_found
 
-    [ page[:status], page.render ] # Return page status and content
+      lang = path.shift # Determine language
+
+      storage = create_storage( cfg ) # Page storage
+      page = storage.page( lang, path ) # Find page by path
+      page = storage.status_page( lang, path, 404 ) unless page && page.file # Render 404 page if there are no page, or there are no file
+
+      [ page[:status], page.render ] # Return page status and content
+    else
+      [ 404, "Page not found" ]
+    end
   end
 
   private
 
-  def create_storage
-    Rayo::Storage.new( config )
+  def create_storage( cfg )
+    Rayo::Storage.new( cfg )
   end
 
   def select_language

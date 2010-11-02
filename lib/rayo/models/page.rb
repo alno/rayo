@@ -16,7 +16,11 @@ class Rayo::Models::Page
   end
 
   def descendant( relative_path )
-    relative_path.inject( self ) {|page,slug| page.child( slug ) }
+    relative_path.inject( self ) do |page,slug|
+      return nil unless page
+
+      page.child( slug )
+    end
   end
 
   def children
