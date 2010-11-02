@@ -29,17 +29,17 @@ class Rayo::Application < Sinatra::Base
     return redirect '/' + path.join('/') if empty_segments_found
 
     lang = path.shift # Determine language
-    storage = create_storage( lang ) # Page storage
-    page = storage.page( path ) # Find page by path
-    page = storage.status_page( path, 404 ) unless page && page.file # Render 404 page if there are no page, or there are no file
+    storage = create_storage # Page storage
+    page = storage.page( lang, path ) # Find page by path
+    page = storage.status_page( lang, path, 404 ) unless page && page.file # Render 404 page if there are no page, or there are no file
 
     [ page[:status], page.render ] # Return page status and content
   end
 
   private
 
-  def create_storage( lang )
-    Rayo::Storage.new( config, lang )
+  def create_storage
+    Rayo::Storage.new( config )
   end
 
   def select_language

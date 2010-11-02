@@ -8,7 +8,7 @@ module Rayo::Tags::NavigationTags
 
     if path.first.empty?
       path.shift
-      page = tag.locals.page.storage.root_page
+      page = tag.locals.page.storage.root_page( tag.globals.page.lang )
     else
       page = tag.locals.page
     end

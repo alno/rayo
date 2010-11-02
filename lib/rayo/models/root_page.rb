@@ -3,8 +3,8 @@ require File.join(File.dirname(__FILE__), 'status_page.rb')
 
 class Rayo::Models::RootPage < Rayo::Models::Page
 
-  def initialize( storage )
-    super( storage, nil, [] )
+  def initialize( storage, lang )
+    super( storage, nil, lang, [] )
   end
 
   def directories
@@ -12,7 +12,7 @@ class Rayo::Models::RootPage < Rayo::Models::Page
   end
 
   def file
-    @file ||= @storage.find_page_file( directories, 'index' )
+    @file ||= @storage.find_page_file( directories, @lang, 'index' )
   end
 
   def params

@@ -6,10 +6,11 @@ describe Rayo::Models::Page do
     @config = Rayo::Config.new
     @config.content_dir = 'content'
 
-    @storage = TestStorage.new @config, 'en'
+    @storage = TestStorage.new @config
     @storage.file path( 'content', 'pages', 'test.yml' ), ''
     @storage.file path( 'content', 'pages', 'test.html' ), ''
     @storage.file path( 'content', 'pages', 'test2.en.yml' ), ''
+    @storage.file path( 'content', 'pages', 'test2.ru.yml' ), ''
     @storage.file path( 'content', 'pages', 'test2.html' ), ''
     @storage.file path( 'content', 'pages', 'test3.en.yml' ), ''
     @storage.file path( 'content', 'pages', 'test3.en.html' ), ''
@@ -18,11 +19,11 @@ describe Rayo::Models::Page do
     @storage.file path( 'content', 'pages', 'users', '%name.yml' ), ''
     @storage.file path( 'content', 'pages', '404.yml' ), 'title: Not found'
     @storage.file path( 'content', 'pages', '404.html' ), ''
-
-    @root = @storage.root_page
   end
 
   context "'/'" do
+
+    before { @root = @storage.root_page( 'en' ) }
 
     it { @root.descendant([]).should == @root }
     it { @root.path.should == [] }
@@ -34,7 +35,7 @@ describe Rayo::Models::Page do
 
   context "'/test'" do
 
-    before { @page = @root.descendant(['test']) }
+    before { @page = @storage.page(:en,['test']) }
 
     specify { @page.should_not be_nil }
     specify { @page.path.should == ['test'] }
@@ -50,7 +51,7 @@ describe Rayo::Models::Page do
 
   context "'/test2'" do
 
-    before { @page = @root.descendant(['test2']) }
+    before { @page = @storage.page(:en,['test2']) }
 
     specify { @page.should_not be_nil }
     specify { @page.path.should == ['test2'] }
@@ -61,11 +62,26 @@ describe Rayo::Models::Page do
     specify { @page.should have(1).parts }
     specify { @page.parts.should include 'body' }
 
-end
+  end
+
+  context "'/test2' with lang 'ru'" do
+
+    before { @page = @storage.page(:ru,['test2']) }
+
+    specify { @page.should_not be_nil }
+    specify { @page.path.should == ['test2'] }
+    specify { @page.params.should == { 'path' => ['test2'] } }
+    specify { @page.file.should == path( 'content', 'pages', 'test2.ru.yml' ) }
+
+    specify { @page.should have(0).children }
+    specify { @page.should have(1).parts }
+    specify { @page.parts.should include 'body' }
+
+  end
 
   context "'/test3'" do
 
-    before { @page = @root.descendant(['test3']) }
+    before { @page = @storage.page(:en,['test3']) }
 
     specify { @page.should_not be_nil }
     specify { @page.path.should == ['test3'] }
@@ -80,7 +96,7 @@ end
 
   context "'/users'" do
 
-    before { @page = @root.descendant(['users']) }
+    before { @page = @storage.page(:en,['users']) }
 
     specify { @page.should have(0).children }
 
@@ -88,7 +104,7 @@ end
 
   context "'/users/alex'" do
 
-    before { @page = @root.descendant(['users','alex']) }
+    before { @page = @storage.page(:en,['users','alex']) }
 
     specify { @page.should_not be_nil }
     specify { @page.path.should == ['users','alex'] }
@@ -100,7 +116,7 @@ end
 
   context "'/unknown_page'" do
 
-    before { @page = @storage.status_page(['unknown_page'],404) }
+    before { @page = @storage.status_page(:en,['unknown_page'],404) }
 
     specify { @page.should_not be_nil }
     specify { @page.path.should == ['unknown_page'] }

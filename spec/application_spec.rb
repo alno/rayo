@@ -1,5 +1,7 @@
 require File.dirname(__FILE__) + '/spec_helper'
 
+require 'ruby-debug'
+
 describe "Multilingual application" do
   include Rack::Test::Methods
 
@@ -10,8 +12,8 @@ describe "Multilingual application" do
         c.content_dir = 'content'
       end
 
-      def create_storage( lang )
-        storage = TestStorage.new config, 'en'
+      def create_storage
+        storage = TestStorage.new( config )
         storage.file path( 'content', 'layouts', 'base.html' ), "<html><title><r:title /></title><body><r:content inherit=\"true\" /></body></html>"
         storage.file path( 'content', 'snippets', 'test.html' ), "Test snippet"
         storage.file path( 'content', 'pages', 'index.yml' ), "title: Index Page\nlayout: base\n"
@@ -29,8 +31,10 @@ describe "Multilingual application" do
 
   it "should respond to /en" do
     get '/en'
+    debugger
     last_response.should be_ok
     last_response.body.should == '<html><title>Index Page</title><body>Example content: Users Test Page </body></html>'
+
   end
 
   it "should respond to /en/test" do

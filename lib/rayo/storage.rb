@@ -5,79 +5,91 @@ class Rayo::Storage
 
   attr_reader :config
 
-  def initialize( config, lang )
+  def initialize( config )
     @config = config
 
-    @lang = lang
-    @lang_prefix = '.' + lang
-
+    @roots = {}
     @layouts = {}
     @snippets = {}
   end
 
-  def snippet( name )
-    @snippets[name.to_s] ||= find_renderable( :snippets, name.to_s ) || raise( "Snippet '#{name}' not found" )
+  def snippet( lang, name )
+    @snippets["#{lang}|#{name}"] ||= find_renderable( :snippets, lang, name.to_s ) || raise( "Snippet '#{name}' not found" )
   end
 
-  def layout( name )
-    @layouts[name.to_s] ||= find_renderable( :layouts,  name.to_s ) || raise( "Layout '#{name}' not found" )
+  def layout( lang, name )
+    @layouts["#{lang}|#{name}"] ||= find_renderable( :layouts, lang, name.to_s ) || raise( "Layout '#{name}' not found" )
   end
 
-  def root_page
-    @root_page ||= Rayo::Models::RootPage.new( self )
+  # Retrieves root page for specific language
+  #
+  # @param [String,Symbol] page language
+  # @return [Rayo::Models::RootPage] root page
+  def root_page( lang )
+    @roots[ lang.to_s ] ||= Rayo::Models::RootPage.new( self, lang.to_s )
   end
 
-  def page( path )
-    root_page.descendant( path )
+  # Retrieves page for specific language and path
+  #
+  # @param [String,Symbol] page language
+  # @param [Array<String>] page path
+  # @return [Rayo::Models::Page] page
+  def page( lang, path )
+    root_page( lang ).descendant( path )
   end
 
-  def status_page( path, status )
-    Rayo::Models::StatusPage.new( self, root_page, path, status )
+  # Retrieves status page for specific language and path
+  #
+  # @param [String,Symbol] page language
+  # @param [Array<String>] page path
+  # @return [Rayo::Models::StatusPage] status page
+  def status_page( lang, path, status )
+    Rayo::Models::StatusPage.new( self, root_page( lang ), path, status )
   end
 
-  def find_renderable( type, name )
-    if file = find_file( [config.directory( type )], name, config.renderable_exts )
+  def find_renderable( type, lang, name )
+    if file = find_file( [config.directory( type )], lang, name, config.renderable_exts )
       renderable( file, File.extname( file ) )
     end
   end
 
-  def find_page_file( dirs, slug )
-    find_file( dirs, slug, config.page_exts )
+  def find_page_file( dirs, lang, slug )
+    find_file( dirs, lang, slug, config.page_exts )
   end
 
-  def find_page_dirs( dirs, slug )
-    find_files dirs, slug, ['']
+  def find_page_dirs( dirs, lang, slug )
+    find_files( dirs, lang, slug, [''] )
   end
 
-  def find_pages( dirs )
+  def find_pages( dirs, lang )
     res = []
-    glob_files dirs, '*', config.page_exts + [''] do |file,base,ext|
+    glob_files dirs, lang, '*', config.page_exts + [''] do |file,base,ext|
       elems = base.split('.')
-      name = elems[0]
-      lang = elems[1]
+      elem_name = elems[0]
+      elem_lang = elems[1]
 
-      res << name unless name[0..0] == '%' || (dirs == root_page.directories && (name == 'index' || name =~ /^\d+$/ )) || (lang && lang != @lang)
+      res << elem_name unless elem_name[0..0] == '%' || (dirs == ([ @config.directory :pages ]) && (elem_name == 'index' || elem_name =~ /^\d+$/ )) || (elem_lang && elem_lang != lang)
     end
     res.uniq
   end
 
-  def find_page_parts( page_file )
+  def find_page_parts( page_file, lang )
     parts = {}
     page_file_base = File.basename( page_file ).split('.').first
-    glob_files File.dirname( page_file ), page_file_base + '*', config.renderable_exts do |file,base,ext|
+    glob_files File.dirname( page_file ), lang, page_file_base + '*', config.renderable_exts do |file,base,ext|
       elems = base.split('.')
 
       if elems.shift == page_file_base # Remove base (slug or variable)
         if elems.size == 0 # There are no part name and language
           parts[ 'body'   ] ||= renderable( file, ext )
         elsif elems.size == 1 # There are no language or no part name
-          if elems[0] == @lang
+          if elems[0] == lang
             parts[ 'body'   ] ||= renderable( file, ext )
           else
             parts[ elems[0] ] ||= renderable( file, ext )
           end
         else
-          parts[ elems[0] ] ||= renderable( file, ext ) if elems[1] == @lang
+          parts[ elems[0] ] ||= renderable( file, ext ) if elems[1] == lang
         end
       end
     end
@@ -95,22 +107,24 @@ class Rayo::Storage
   end
 
   # Find first file with given name (or variable) and extension from given set
-  def find_file( dirs, name, exts )
-    glob_files( dirs, name, exts ) { |file,base,ext| return file }
+  def find_file( dirs, lang, name, exts )
+    glob_files( dirs, lang, name, exts ) { |file,base,ext| return file }
     nil
   end
 
   # Find files with given name (or variable) and extension from given set
-  def find_files( dirs, name, exts )
+  def find_files( dirs, lang, name, exts )
     results = []
-    glob_files( dirs, name, exts ) { |file,base,ext| results << file }
+    glob_files( dirs, lang, name, exts ) { |file,base,ext| results << file }
     results
   end
 
-  def glob_files( dirs, name, exts, &block )
-    glob dirs, name + @lang_prefix, //, exts, &block # Search with given name and language
+  def glob_files( dirs, lang, name, exts, &block )
+    lang_prefix = "." + lang
+
+    glob dirs, name + lang_prefix, //, exts, &block # Search with given name and language
     glob dirs, name, //, exts, &block # Search with given name without language
-    glob dirs, '%*' + @lang_prefix, /^%.+\.#{@lang}$/, exts, &block # Search with variable and language
+    glob dirs, '%*' + lang_prefix, /^%.+\.#{lang}$/, exts, &block # Search with variable and language
     glob dirs, '%*',  /^%.+$/, exts, &block # Search with variable without language
   end
 

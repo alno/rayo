@@ -6,11 +6,12 @@ require File.join(File.dirname(__FILE__), '..', 'tag_context.rb')
 
 class Rayo::Models::Page
 
-  attr_reader :storage, :parent, :path
+  attr_reader :storage, :parent, :lang, :path
 
-  def initialize( storage, parent, path )
+  def initialize( storage, parent, lang, path )
     @storage = storage
     @parent = parent
+    @lang = lang
     @path = path
   end
 
@@ -19,29 +20,29 @@ class Rayo::Models::Page
   end
 
   def children
-    @children ||= @storage.find_pages( directories ).map{|name| child( name ) }
+    @children ||= @storage.find_pages( directories, @lang ).map{|name| child( name ) }
   end
 
   def child( slug )
     @children_cache ||= {}
     return @children_cache[ slug ] if @children_cache.include? slug
 
-    page = Rayo::Models::Page.new( @storage, self, @path + [slug] )
+    page = Rayo::Models::Page.new( @storage, self, @lang, @path + [slug] )
     page = nil if page.file.nil? && page.directories.empty?
 
     @children_cache[ slug ] = page
   end
 
   def directories
-    @directories ||= @storage.find_page_dirs( @parent.directories, @path.last )
+    @directories ||= @storage.find_page_dirs( @parent.directories, @lang, @path.last )
   end
 
   def file
-    @file ||= @storage.find_page_file( @parent.directories, @path.last )
+    @file ||= @storage.find_page_file( @parent.directories, @lang, @path.last )
   end
 
   def parts
-    @parts ||= file ? @storage.find_page_parts( file ) : {}
+    @parts ||= file ? @storage.find_page_parts( file, @lang ) : {}
   end
 
   def find_part( part_name, inherit = false )
@@ -80,7 +81,7 @@ class Rayo::Models::Page
   end
 
   def layout
-    @layout ||= @storage.layout( context['layout'] )
+    @layout ||= @storage.layout( @lang, context['layout'] )
   end
 
   def []( key )
