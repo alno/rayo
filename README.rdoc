@@ -114,13 +114,35 @@ And register it:
 
   c.add_tags MyTags
 
+=== Multidomain applications
+
+Sometimes you may want to serve different domains with one application sharing layouts and snippets. Rayo has built-in support for this scenario. All you need is to create subdirectories in pages for different domains and add some lines to <tt>configure</tt> block:
+
+To serve 'first.example.com' with pages from <tt>content/pages/first.example.com</tt> directory:
+
+  c.add_domain 'first.example.com'
+
+To serve 'second.example.com' or 'www.second.example.com' with pages from <tt>content/pages/second</tt> directory:
+
+  c.add_domain 'second.', /^(www\.)?second\.example\.com$/
+
+With both lines corresponding directory structure should be:
+
+  content
+  + layouts
+  + snippets
+  + pages
+    + first.example.com
+    + second
+
+That's all you need to build multi-domain application.
+
 == Planned features
 
 * Support for sites without I18n
 * Support for different page formats
 * Drop-in tag libary support
 * Support for pages without .yml
-* Support for multi-domain sites
 * Generator which creates a set of static pages from content structure
 
 == Contributors
