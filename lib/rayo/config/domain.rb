@@ -9,7 +9,7 @@ class Rayo::Config::Domain
   def initialize( parent, name, exp )
     @parent = parent
     @name = name
-    @exp = exp
+    @exp = exp || Regexp.new( "^#{Regexp.quote( name )}\.?$" )
   end
 
   def matches?( host )

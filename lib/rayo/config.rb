@@ -14,7 +14,7 @@ class Rayo::Config
     @page_exts = ['.yml']
 
     @filters = {}
-    @domains = {}
+    @domains = []
 
     # Default filters
     add_filter('html'){|source| source }
@@ -48,7 +48,7 @@ class Rayo::Config
   # @param [String] domain name
   # @param [Regexp,String] host pattern
   def add_domain( name, exp = nil )
-    @domains[ name.to_s ] = Rayo::Config::Domain.new( self, name, exp || name )
+    @domains << Rayo::Config::Domain.new( self, name, exp )
   end
 
   # Create new object containing all defined tags
@@ -69,13 +69,11 @@ class Rayo::Config
   end
 
   def domain( host )
-    return self if @domains.empty?
-
-    @domains.each do |name, domain|
-      return domain if domain.matches? host
+    if @domains.empty?
+      self # No multidomain support
+    else
+      @domains.find { |domain| domain.matches? host }
     end
-
-    nil
   end
 
 end
