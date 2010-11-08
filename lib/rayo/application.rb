@@ -21,21 +21,15 @@ class Rayo::Application < Sinatra::Base
   end
 
   get '/*' do |path|
-    cfg = config.domain( request.host ) # Config for current host
+    if cfg = config.domain( request.host ) # Config for current host
+      redir, lang, path, format = analyze_path path # Analyze path
 
-    if cfg
-      path = path.split '/' # Split path into segments
-
-      empty_segments_found = path.reject! {|e| e.empty? } # Clear path and detect empty segments
-
-      return redirect_to_lang path unless config.languages.include? path.first
-      return redirect '/' + path.join('/') if empty_segments_found
-
-      lang = path.shift # Determine language
+      redirect_to_page( lang || select_language, path, format ) if redir # Redirect
 
       storage = create_storage( cfg ) # Page storage
-      page = storage.page( lang, path ) # Find page by path
-      page = storage.status_page( lang, path, 404 ) unless page && page.file # Render 404 page if there are no page, or there are no file
+
+      page = storage.page( lang, path, format || config.default_format) # Find page by path
+      page = storage.status_page( lang, path, format || config.default_format, 404 ) unless page && page.file # Render 404 page if there are no page, or there are no file
 
       [ page[:status], page.render ] # Return page status and content
     else
@@ -45,16 +39,35 @@ class Rayo::Application < Sinatra::Base
 
   private
 
+  def analyze_path( path )
+    path = path.split '/' # Split path into segments
+    redir = path.reject! {|e| e.empty? } # Clear path and detect empty segments
+
+    unless path.empty? # If path non-empty
+      if m = path.last.match( /^(.*)\.([^.]+)$/ ) # Detect format
+        format = m[2]
+        path[-1] = m[1]
+      end
+
+      lang = path.shift if config.languages.include? path.first # Detect language
+    end
+
+    [redir || lang.nil?, lang, path, format]
+  end
+
+  def redirect_to_page( lang, path, format )
+    url = '/' + [ lang || select_language, *path ].join('/')
+    url << '.' + format if format
+
+    redirect url
+  end
+
   def create_storage( cfg )
     Rayo::Storage.new( cfg )
   end
 
   def select_language
     config.languages.first
-  end
-
-  def redirect_to_lang( path )
-    redirect '/' + [ select_language, *path].join('/')
   end
 
 end

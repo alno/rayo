@@ -13,9 +13,11 @@ describe "Multilingual application" do
       def create_storage( cfg )
         storage = TestStorage.new( cfg )
         storage.file path( 'content', 'layouts', 'base.html' ), "<html><title><r:title /></title><body><r:content inherit=\"true\" /></body></html>"
+        storage.file path( 'content', 'layouts', 'base.xml' ), "<xml><r:content inherit=\"true\" /></xml>"
         storage.file path( 'content', 'snippets', 'test.html' ), "Test snippet"
         storage.file path( 'content', 'pages', 'index.yml' ), "title: Index Page\nlayout: base\n"
         storage.file path( 'content', 'pages', 'index.html' ), "Example content: <r:children:each><r:title /> </r:children:each>"
+        storage.file path( 'content', 'pages', 'index.xml' ), "Example XML content: <r:children:each><r:title /> </r:children:each>"
         storage.file path( 'content', 'pages', 'test.yml' ), "title: Test Page\n"
         storage.file path( 'content', 'pages', 'test.html' ), "Test <r:snippet name=\"test\" />"
         storage.file path( 'content', 'pages', 'users.yml' ), "title: Users\n"
@@ -31,6 +33,18 @@ describe "Multilingual application" do
     get '/en'
     last_response.should be_ok
     last_response.body.should == '<html><title>Index Page</title><body>Example content: Users Test Page </body></html>'
+  end
+
+  it "should respond to /en.html" do
+    get '/en.html'
+    last_response.should be_ok
+    last_response.body.should == '<html><title>Index Page</title><body>Example content: Users Test Page </body></html>'
+  end
+
+  it "should respond to /en.xml" do
+    get '/en.xml'
+    last_response.should be_ok
+    last_response.body.should == '<xml>Example XML content: Users Test Page </xml>'
   end
 
   it "should respond to /en/test" do

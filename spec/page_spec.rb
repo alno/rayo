@@ -23,7 +23,7 @@ describe Rayo::Models::Page do
 
   context "'/'" do
 
-    before { @root = @storage.root_page( 'en' ) }
+    before { @root = @storage.root_page( 'en', 'html' ) }
 
     it { @root.descendant([]).should == @root }
     it { @root.path.should == [] }
@@ -35,7 +35,7 @@ describe Rayo::Models::Page do
 
   context "'/test'" do
 
-    before { @page = @storage.page(:en,['test']) }
+    before { @page = @storage.page(:en, ['test'], 'html') }
 
     specify { @page.should_not be_nil }
     specify { @page.path.should == ['test'] }
@@ -51,7 +51,7 @@ describe Rayo::Models::Page do
 
   context "'/test2'" do
 
-    before { @page = @storage.page(:en,['test2']) }
+    before { @page = @storage.page(:en, ['test2'], 'html') }
 
     specify { @page.should_not be_nil }
     specify { @page.path.should == ['test2'] }
@@ -66,7 +66,7 @@ describe Rayo::Models::Page do
 
   context "'/test2' with lang 'ru'" do
 
-    before { @page = @storage.page(:ru,['test2']) }
+    before { @page = @storage.page(:ru, ['test2'], 'html') }
 
     specify { @page.should_not be_nil }
     specify { @page.path.should == ['test2'] }
@@ -81,7 +81,7 @@ describe Rayo::Models::Page do
 
   context "'/test3'" do
 
-    before { @page = @storage.page(:en,['test3']) }
+    before { @page = @storage.page(:en, ['test3'], 'html') }
 
     specify { @page.should_not be_nil }
     specify { @page.path.should == ['test3'] }
@@ -96,7 +96,7 @@ describe Rayo::Models::Page do
 
   context "'/users'" do
 
-    before { @page = @storage.page(:en,['users']) }
+    before { @page = @storage.page(:en, ['users'], 'html') }
 
     specify { @page.should have(0).children }
 
@@ -104,7 +104,7 @@ describe Rayo::Models::Page do
 
   context "'/users/alex'" do
 
-    before { @page = @storage.page(:en,['users','alex']) }
+    before { @page = @storage.page(:en, ['users','alex'], 'html') }
 
     specify { @page.should_not be_nil }
     specify { @page.path.should == ['users','alex'] }
@@ -116,7 +116,7 @@ describe Rayo::Models::Page do
 
   context "'/unknown_page'" do
 
-    before { @page = @storage.status_page(:en,['unknown_page'],404) }
+    before { @page = @storage.status_page(:en, ['unknown_page'], 'html', 404) }
 
     specify { @page.should_not be_nil }
     specify { @page.path.should == ['unknown_page'] }

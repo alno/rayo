@@ -3,7 +3,7 @@ require File.join(File.dirname(__FILE__), 'page.rb')
 class Rayo::Models::StatusPage < Rayo::Models::Page
 
   def initialize( storage, root, path, status )
-    super( storage, root, root.lang, path )
+    super( storage, root, root.lang, path, root.format )
 
     @status = status
   end
@@ -13,7 +13,7 @@ class Rayo::Models::StatusPage < Rayo::Models::Page
   end
 
   def file
-    @file ||= @storage.find_page_file( @parent.directories, @lang, @status.to_s )
+    @file ||= @storage.find_page_file( @parent.directories, @lang, @status.to_s, @format )
   end
 
   def context

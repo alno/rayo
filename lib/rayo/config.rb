@@ -9,12 +9,12 @@ class Rayo::Config
   attr_accessor :languages
   attr_accessor :page_exts
 
-  attr_accessor :default_content_ext
+  attr_accessor :default_format
 
   attr_reader :renderable_exts
 
   def initialize
-    @default_context_ext = :html
+    @default_format = 'html'
     @renderable_exts = []
 
     @languages = ['en']
@@ -45,9 +45,9 @@ class Rayo::Config
   # Add filter
   #
   # @param [String,Symbol] renderable file extension
-  # @param [String,Symbol] requested content extension
+  # @param [String,Symbol] requested content format
   # @param [Proc] filter proc which accepts source and return it in processed form
-  def add_filter( from, to = default_content_ext, &filter )
+  def add_filter( from, to = default_format, &filter )
     @filters["#{from}-#{to}"] = filter
     @renderable_exts << ".#{from}" unless @renderable_exts.include? ".#{from}"
   end
@@ -72,8 +72,8 @@ class Rayo::Config
   # Get filter by renderable extension and requested content extension
   #
   # @param [String,Symbol] renderable file extension
-  # @param [String,Symbol] requested content extension
-  def filter( from, to = default_content_ext )
+  # @param [String,Symbol] requested content format
+  def filter( from, to = default_format )
     @filters["#{from}-#{to}"]
   end
 

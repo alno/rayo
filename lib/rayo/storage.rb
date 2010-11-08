@@ -13,55 +13,58 @@ class Rayo::Storage
     @snippets = {}
   end
 
-  def snippet( lang, name )
-    @snippets["#{lang}|#{name}"] ||= find_renderable( :snippets, lang, name.to_s ) || raise( "Snippet '#{name}' not found" )
+  def snippet( lang, name, format )
+    @snippets["#{lang}|#{name}"] ||= find_renderable( :snippets, lang, name.to_s, format ) || raise( "Snippet '#{name}' not found" )
   end
 
-  def layout( lang, name )
-    @layouts["#{lang}|#{name}"] ||= find_renderable( :layouts, lang, name.to_s ) || raise( "Layout '#{name}' not found" )
+  def layout( lang, name, format )
+    @layouts["#{lang}|#{name}"] ||= find_renderable( :layouts, lang, name.to_s, format ) || raise( "Layout '#{name}' not found" )
   end
 
   # Retrieves root page for specific language
   #
   # @param [String,Symbol] page language
+  # @param [String,Symbol] content format
   # @return [Rayo::Models::RootPage] root page
-  def root_page( lang )
-    @roots[ lang.to_s ] ||= Rayo::Models::RootPage.new( self, lang.to_s )
+  def root_page( lang, format )
+    @roots[ lang.to_s ] ||= Rayo::Models::RootPage.new( self, lang.to_s, format )
   end
 
   # Retrieves page for specific language and path
   #
   # @param [String,Symbol] page language
   # @param [Array<String>] page path
+  # @param [String,Symbol] content format
   # @return [Rayo::Models::Page] page
-  def page( lang, path )
-    root_page( lang ).descendant( path )
+  def page( lang, path, format )
+    root_page( lang, format ).descendant( path )
   end
 
   # Retrieves status page for specific language and path
   #
   # @param [String,Symbol] page language
   # @param [Array<String>] page path
+  # @param [String,Symbol] content format
   # @return [Rayo::Models::StatusPage] status page
-  def status_page( lang, path, status )
-    Rayo::Models::StatusPage.new( self, root_page( lang ), path, status )
+  def status_page( lang, path, format, status )
+    Rayo::Models::StatusPage.new( self, root_page( lang, format ), path, status )
   end
 
-  def find_renderable( type, lang, name )
+  def find_renderable( type, lang, name, format )
     if file = find_file( [config.directory( type )], lang, name, config.renderable_exts )
       renderable( file, File.extname( file ) )
     end
   end
 
-  def find_page_file( dirs, lang, slug )
+  def find_page_file( dirs, lang, slug, format )
     find_file( dirs, lang, slug, config.page_exts )
   end
 
-  def find_page_dirs( dirs, lang, slug )
+  def find_page_dirs( dirs, lang, slug, format )
     find_files( dirs, lang, slug, [''] )
   end
 
-  def find_pages( dirs, lang )
+  def find_pages( dirs, lang, format )
     res = []
     glob_files dirs, lang, '*', config.page_exts + [''] do |file,base,ext|
       elems = base.split('.')
@@ -73,7 +76,7 @@ class Rayo::Storage
     res.uniq
   end
 
-  def find_page_parts( page_file, lang )
+  def find_page_parts( page_file, lang, format )
     parts = {}
     page_file_base = File.basename( page_file ).split('.').first
     glob_files File.dirname( page_file ), lang, page_file_base + '*', config.renderable_exts do |file,base,ext|
