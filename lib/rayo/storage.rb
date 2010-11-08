@@ -103,7 +103,7 @@ class Rayo::Storage
   private
 
   def renderable( file, ext )
-    Rayo::Models::Renderable.new( self, file, config.filter( ext ) || raise( "Filter for '#{ext} not found" ) )
+    Rayo::Models::Renderable.new( self, file, config.filter( ext[1..-1] ) || raise( "Filter for '#{ext} not found" ) )
   end
 
   # Find first file with given name (or variable) and extension from given set

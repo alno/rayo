@@ -9,7 +9,14 @@ class Rayo::Config
   attr_accessor :languages
   attr_accessor :page_exts
 
+  attr_accessor :default_content_ext
+
+  attr_reader :renderable_exts
+
   def initialize
+    @default_context_ext = :html
+    @renderable_exts = []
+
     @languages = ['en']
     @page_exts = ['.yml']
 
@@ -37,10 +44,12 @@ class Rayo::Config
 
   # Add filter
   #
-  # @param [String,Symbol] file extension
+  # @param [String,Symbol] renderable file extension
+  # @param [String,Symbol] requested content extension
   # @param [Proc] filter proc which accepts source and return it in processed form
-  def add_filter( ext, &filter )
-    @filters[".#{ext}"] = filter
+  def add_filter( from, to = default_content_ext, &filter )
+    @filters["#{from}-#{to}"] = filter
+    @renderable_exts << ".#{from}" unless @renderable_exts.include? ".#{from}"
   end
 
   # Add domain
@@ -60,12 +69,12 @@ class Rayo::Config
     File.join( @content_dir, content_type.to_s )
   end
 
-  def renderable_exts
-    @filters.keys
-  end
-
-  def filter( ext )
-    @filters[ ext.to_s ]
+  # Get filter by renderable extension and requested content extension
+  #
+  # @param [String,Symbol] renderable file extension
+  # @param [String,Symbol] requested content extension
+  def filter( from, to = default_content_ext )
+    @filters["#{from}-#{to}"]
   end
 
   def domain( host )
