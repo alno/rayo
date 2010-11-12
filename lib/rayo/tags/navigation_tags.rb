@@ -3,19 +3,7 @@ module Rayo::Tags::NavigationTags
   include Rayo::Taggable
 
   tag 'find' do |tag|
-    url = tag.attr['url']
-    path = url.split('/')
-
-    if path.first && path.first.empty?
-      path.shift
-      page = tag.locals.page.storage.root_page( tag.globals.page.lang, tag.globals.page.format )
-    else
-      page = tag.locals.page
-    end
-
-    page = page.descendant( path )
-
-    if page
+    if page = tag.locals.page.relative( tag.attr['url'] )
       tag.locals.page = page
       tag.expand
     else
@@ -40,8 +28,8 @@ module Rayo::Tags::NavigationTags
   end
 
   tag 'children:last' do |tag|
-    if first = tag.locals.children.last
-      tag.locals.page = first
+    if last = tag.locals.children.last
+      tag.locals.page = last
       tag.expand
     end
   end
@@ -55,6 +43,45 @@ module Rayo::Tags::NavigationTags
       tag.locals.page = item
       tag.locals.first_child = i == 0
       tag.locals.last_child = i == children.length - 1
+
+      result << tag.expand
+    end
+    result
+  end
+
+  tag 'related' do |tag|
+    puts  tag.locals.page['relations'].inspect
+    tag.locals.relation = tag.locals.page['relations'][tag.attr['rel']]
+    tag.expand
+  end
+
+  tag 'related:count' do |tag|
+    tag.locals.relation.size
+  end
+
+  tag 'related:first' do |tag|
+    if first = tag.locals.relation.first
+      tag.locals.page = tag.locals.page.relative first
+      tag.expand
+    end
+  end
+
+  tag 'related:last' do |tag|
+    if last = tag.locals.relation.last
+      tag.locals.page = tag.locals.page.relative last
+      tag.expand
+    end
+  end
+
+  tag 'related:each' do |tag|
+    result = ''
+
+    relation = tag.locals.relation
+    relation.each_with_index do |item, i|
+      tag.locals.page = tag.locals.page.relative item
+      tag.locals.first_related = i == 0
+      tag.locals.last_related = i == relation.length - 1
+
       result << tag.expand
     end
     result

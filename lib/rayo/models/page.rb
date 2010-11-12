@@ -28,6 +28,16 @@ class Rayo::Models::Page
     @children ||= @storage.find_pages( directories, @lang, @format ).map{|name| child( name ) }.reject{|c| c['hidden'] }
   end
 
+  def relative( url )
+    path = url.split '/'
+
+    if path.first && path.first.empty?
+      @storage.root_page( @lang, @format ).descendant( path[1..-1] )
+    else
+      descendant( path )
+    end
+  end
+
   def child( slug )
     @children_cache ||= {}
     return @children_cache[ slug ] if @children_cache.include? slug

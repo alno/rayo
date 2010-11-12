@@ -28,6 +28,10 @@ module Rayo::Tags::PropertyTags
     end
   end
 
+  tag 'url' do |tag|
+    "/#{tag.locals.page.lang}/#{tag.locals.page.path.join('/')}"
+  end
+
   tag 'link' do |tag|
     "<a href=\"#{send 'tag:path', tag}\">#{tag.single? ? send( 'tag:title', tag ) : tag.expand}</a>"
   end
