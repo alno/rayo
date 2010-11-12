@@ -45,7 +45,13 @@ module Rayo::Tags::PropertyTags
   end
 
   tag 'date' do |tag|
-    Time.now.strftime(tag.attr['format'] || '%A, %B %d, %Y')
+    if tag.attr['for'] == 'now'
+      Time.now
+    elsif tag.attr['for']
+      tag.locals.page[tag.attr['for']]
+    else
+      tag.locals.page['published_at']
+    end.strftime(tag.attr['format'] || '%A, %B %d, %Y')
   end
 
   private

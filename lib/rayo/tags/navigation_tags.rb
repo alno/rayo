@@ -12,7 +12,13 @@ module Rayo::Tags::NavigationTags
   end
 
   tag 'children' do |tag|
-    tag.locals.children = tag.locals.page.children
+    children = tag.locals.page.children
+
+    [ tag.attr['level'].to_i - 1, 0 ].max.times do
+      children = children.map{ |p| p.children }.flatten
+    end
+
+    tag.locals.children = children
     tag.expand
   end
 
@@ -38,11 +44,23 @@ module Rayo::Tags::NavigationTags
     result = ''
 
     children = tag.locals.children
+
+    if by = tag.attr['by']
+      if tag.attr['order'] == 'desc'
+        puts children.map{|c| c[by]}.inspect
+        children = children.sort {|a,b| b[by] <=> a[by] }
+      else
+        children = children.sort {|a,b| a[by] <=> b[by] }
+      end
+    end
+
+    children = children[0..(tag.attr['limit'].to_i - 1)] if tag.attr['limit']
+
     children.each_with_index do |item, i|
       tag.locals.child = item
       tag.locals.page = item
       tag.locals.first_child = i == 0
-      tag.locals.last_child = i == children.length - 1
+      tag.locals.last_child = i == children.size - 1
 
       result << tag.expand
     end
@@ -80,7 +98,7 @@ module Rayo::Tags::NavigationTags
     relation.each_with_index do |item, i|
       tag.locals.page = tag.locals.page.relative item
       tag.locals.first_related = i == 0
-      tag.locals.last_related = i == relation.length - 1
+      tag.locals.last_related = i == relation.size - 1
 
       result << tag.expand
     end
