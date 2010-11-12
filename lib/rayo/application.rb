@@ -20,9 +20,9 @@ class Rayo::Application < Sinatra::Base
     self.class.config
   end
 
-  get '/*' do |path|
+  get '/*' do |url|
     if cfg = config.domain( request.host ) # Config for current host
-      redir, lang, path, format = analyze_path path # Analyze path
+      redir, lang, path, format = analyze_path url # Analyze path
 
       redirect_to_page( lang || select_language, path, format ) if redir # Redirect
 
@@ -33,15 +33,20 @@ class Rayo::Application < Sinatra::Base
 
       [ page[:status], page.render ] # Return page status and content
     else
-      [ 404, "Page not found" ]
+      domain_not_found
     end
   end
 
   private
 
-  def analyze_path( path )
-    path = path.split '/' # Split path into segments
+  def domain_not_found
+    [ 404, "Page not found" ]
+  end
+
+  def analyze_path( p )
+    path = p.split '/' # Split path into segments
     redir = path.reject! {|e| e.empty? } # Clear path and detect empty segments
+    redir ||= p[-1..-1] == '/'
 
     unless path.empty? # If path non-empty
       if m = path.last.match( /^(.*)\.([^.]+)$/ ) # Detect format

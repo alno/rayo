@@ -71,8 +71,26 @@ describe "Multilingual application" do
     last_response.location.should == '/en'
   end
 
+  it "should redirect /en/ to /en" do
+    get '/en/'
+    last_response.should be_redirect
+    last_response.location.should == '/en'
+  end
+
   it "should redirect from /test to /en/test" do
     get '/test'
+    last_response.should be_redirect
+    last_response.location.should == '/en/test'
+  end
+
+  it "should redirect from /test/ to /en/test" do
+    get '/test/'
+    last_response.should be_redirect
+    last_response.location.should == '/en/test'
+  end
+
+  it "should redirect from /en/test/ to /en/test" do
+    get '/en/test/'
     last_response.should be_redirect
     last_response.location.should == '/en/test'
   end
