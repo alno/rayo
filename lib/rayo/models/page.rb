@@ -25,7 +25,7 @@ class Rayo::Models::Page
   end
 
   def children
-    @children ||= @storage.find_pages( directories, @lang, @format ).map{|name| child( name ) }
+    @children ||= @storage.find_pages( directories, @lang, @format ).map{|name| child( name ) }.reject{|c| c['hidden'] }
   end
 
   def child( slug )
