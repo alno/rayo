@@ -6,7 +6,7 @@ module Rayo::Tags::NavigationTags
     url = tag.attr['url']
     path = url.split('/')
 
-    if path.first.empty?
+    if path.first && path.first.empty?
       path.shift
       page = tag.locals.page.storage.root_page( tag.globals.page.lang, tag.globals.page.format )
     else
