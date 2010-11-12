@@ -25,7 +25,7 @@ class Rayo::Models::Page
   end
 
   def children
-    @children ||= @storage.find_pages( directories, @lang, @format ).map{|name| child( name ) }.reject{|c| c['hidden'] }
+    @children ||= @storage.find_pages( directories, @lang, @format ).map{|name| child( name ) }
   end
 
   def relative( url )
@@ -116,7 +116,13 @@ class Rayo::Models::Page
   private
 
   def load_context( filename )
-    YAML::load( Erubis::Eruby.new( @storage.load( filename ) ).result( params ) )
+    cont = @storage.load( filename )
+
+    if cont && !cont.strip.empty?
+      YAML::load( Erubis::Eruby.new( cont ).result( params ) )
+    else
+      {}
+    end
   end
 
 end

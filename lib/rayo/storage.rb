@@ -57,7 +57,7 @@ class Rayo::Storage
   end
 
   def find_page_file( dirs, lang, slug, format )
-    find_file( dirs, lang, slug, config.page_exts )
+    find_file( dirs, lang, slug, config.page_exts ) || find_file( dirs, lang, '_' + slug, config.page_exts ) 
   end
 
   def find_page_dirs( dirs, lang, slug, format )
@@ -71,7 +71,7 @@ class Rayo::Storage
       elem_name = elems[0]
       elem_lang = elems[1]
 
-      res << elem_name unless elem_name[0..0] == '%' || (dirs == ([ @config.directory :pages ]) && (elem_name == 'index' || elem_name =~ /^\d+$/ )) || (elem_lang && elem_lang != lang)
+      res << elem_name unless ['%','_'].include?( elem_name[0..0] ) || (dirs == ([ @config.directory :pages ]) && (elem_name == 'index')) || (elem_lang && elem_lang != lang) 
     end
     res.uniq
   end

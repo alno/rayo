@@ -14,11 +14,14 @@ describe Rayo::Models::Page do
     @storage.file path( 'content', 'pages', 'test2.html' ), ''
     @storage.file path( 'content', 'pages', 'test3.en.yml' ), ''
     @storage.file path( 'content', 'pages', 'test3.en.html' ), ''
+    @storage.file path( 'content', 'pages', '_test4.yml' ), ''
+    @storage.file path( 'content', 'pages', '_test4.html' ), ''
     @storage.file path( 'content', 'pages', 'test.footer.html' ), ''
     @storage.file path( 'content', 'pages', 'users.yml' ), ''
     @storage.file path( 'content', 'pages', 'users', '%name.yml' ), ''
-    @storage.file path( 'content', 'pages', '404.yml' ), 'title: Not found'
-    @storage.file path( 'content', 'pages', '404.html' ), ''
+    @storage.dir  path( 'content', 'pages', 'users', 'alex' )
+    @storage.file path( 'content', 'pages', '_404.yml' ), 'title: Not found'
+    @storage.file path( 'content', 'pages', '_404.html' ), ''
   end
 
   context "'/'" do
@@ -94,11 +97,26 @@ describe Rayo::Models::Page do
 
   end
 
+  context "'/test4'" do
+
+    before { @page = @storage.page(:en, ['test4'], 'html') }
+
+    specify { @page.should_not be_nil }
+    specify { @page.path.should == ['test4'] }
+    specify { @page.params.should == { 'path' => ['test4'] } }
+    specify { @page.file.should == path( 'content', 'pages', '_test4.yml' ) }
+
+    specify { @page.should have(0).children }
+    specify { @page.should have(1).parts }
+    specify { @page.parts.should include 'body' }
+
+  end
+
   context "'/users'" do
 
     before { @page = @storage.page(:en, ['users'], 'html') }
 
-    specify { @page.should have(0).children }
+    specify { @page.should have(1).children }
 
   end
 
@@ -122,7 +140,7 @@ describe Rayo::Models::Page do
     specify { @page.path.should == ['unknown_page'] }
     specify { @page.params.should == { 'path' => ['unknown_page'] } }
     specify { @page.context.should == { 'status' => 404, 'title' => 'Not found' } }
-    specify { @page.file.should == path( 'content', 'pages', '404.yml' ) }
+    specify { @page.file.should == path( 'content', 'pages', '_404.yml' ) }
     specify { @page.should have(0).children }
     specify { @page.should have(1).parts }
     specify { @page.parts.should include 'body' }
