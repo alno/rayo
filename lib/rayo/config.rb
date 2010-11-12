@@ -10,6 +10,7 @@ class Rayo::Config
   attr_accessor :page_exts
 
   attr_accessor :default_format
+  attr_accessor :default_domain
 
   attr_reader :renderable_exts
 
@@ -81,7 +82,7 @@ class Rayo::Config
     if @domains.empty?
       self # No multidomain support
     else
-      @domains.find { |domain| domain.matches? host }
+      @domains.find { |domain| domain.matches? host } || @domains.find { |domain| domain.name == @default_domain }
     end
   end
 

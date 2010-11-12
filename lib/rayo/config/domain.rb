@@ -6,6 +6,8 @@ class Rayo::Config::Domain
 
   def_delegators :@parent, :create_tagger, :languages, :page_exts, :renderable_exts, :filter
 
+  attr_reader :name
+
   def initialize( parent, name, exp )
     @parent = parent
     @name = name
