@@ -45,16 +45,24 @@ module Rayo::Tags::PropertyTags
   end
 
   tag 'date' do |tag|
+    date_for( tag ).strftime( tag.attr['format'] || '%A, %B %d, %Y' )
+  end
+
+  tag 'rfc1123_date' do |tag|
+    CGI.rfc1123_date( date_for( tag ) )
+  end
+
+  private
+
+  def date_for( tag )
     if tag.attr['for'] == 'now'
       Time.now
     elsif tag.attr['for']
       tag.locals.page[tag.attr['for']]
     else
       tag.locals.page['published_at']
-    end.strftime(tag.attr['format'] || '%A, %B %d, %Y')
+    end
   end
-
-  private
 
   def if_url( tag )
     tag.locals.page.path =~ Regexp.new( tag.attr['matches'] )
