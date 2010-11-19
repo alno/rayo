@@ -23,6 +23,8 @@ describe "Multilingual application" do
         storage.file path( 'content', 'pages', 'test.xml' ), "Test <r:snippet name=\"test\" format=\"html\" />"
         storage.file path( 'content', 'pages', 'users.yml' ), "title: Users\n"
         storage.file path( 'content', 'pages', 'users', '%name.yml' ), "title: <%=name%>\'s page\n"
+        storage.file path( 'content', 'pages', 'users', 'special.yml' ), "title: Special page\n"
+        storage.file path( 'content', 'pages', 'users', '_hidden.yml' ), "title: Hidden page\n"
         storage
       end
 
@@ -64,13 +66,25 @@ describe "Multilingual application" do
   it "should respond to /en/users" do
     get '/en/users'
     last_response.should be_ok
-    last_response.body.should == '<html><title>Users</title><body>Example content: </body></html>'
+    last_response.body.should == '<html><title>Users</title><body>Example content: Special page </body></html>'
   end
 
   it "should respond to /en/users/alex" do
     get '/en/users/alex'
     last_response.should be_ok
     last_response.body.should == '<html><title>alex\'s page</title><body>Example content: </body></html>'
+  end
+
+  it "should respond to /en/users/special" do
+    get '/en/users/special'
+    last_response.should be_ok
+    last_response.body.should == '<html><title>Special page</title><body>Example content: </body></html>'
+  end
+
+  it "should respond to /en/users/hidden" do
+    get '/en/users/hidden'
+    last_response.should be_ok
+    last_response.body.should == '<html><title>Hidden page</title><body>Example content: </body></html>'
   end
 
   it "should redirect from / to /en" do

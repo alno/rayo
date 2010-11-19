@@ -19,6 +19,7 @@ describe Rayo::Models::Page do
     @storage.file path( 'content', 'pages', 'test.footer.html' ), ''
     @storage.file path( 'content', 'pages', 'users.yml' ), ''
     @storage.file path( 'content', 'pages', 'users', '%name.yml' ), ''
+    @storage.file path( 'content', 'pages', 'users', '_hidden.yml' ), 'title: Hidden'
     @storage.dir  path( 'content', 'pages', 'users', 'alex' )
     @storage.file path( 'content', 'pages', '_404.yml' ), 'title: Not found'
     @storage.file path( 'content', 'pages', '_404.html' ), ''
@@ -128,6 +129,18 @@ describe Rayo::Models::Page do
     specify { @page.path.should == ['users','alex'] }
     specify { @page.params.should == { 'path' => ['users','alex'], 'name' => 'alex' } }
     specify { @page.file.should == path( 'content', 'pages', 'users', '%name.yml' ) }
+    specify { @page.should have(0).children }
+
+  end
+
+  context "'/users/hidden'" do
+
+    before { @page = @storage.page(:en, ['users','hidden']) }
+
+    specify { @page.should_not be_nil }
+    specify { @page.path.should == ['users','hidden'] }
+    specify { @page.params.should == { 'path' => ['users','hidden'] } }
+    specify { @page.file.should == path( 'content', 'pages', 'users', '_hidden.yml' ) }
     specify { @page.should have(0).children }
 
   end

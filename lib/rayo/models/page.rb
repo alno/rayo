@@ -116,7 +116,11 @@ class Rayo::Models::Page
   end
 
   def render( format )
-    layout( format ).render( parser )
+    if l = layout( format )
+      l.render( parser )
+    else
+      "Layout: '#{context['layout']}'' not found with format '#{format}'"
+    end
   end
 
   def parser

@@ -54,7 +54,7 @@ class Rayo::Storage
   end
 
   def find_page_file( dirs, lang, slug )
-    find_file( dirs, lang, slug, config.page_exts ) || find_file( dirs, lang, '_' + slug, config.page_exts )
+    find_file( dirs, lang, slug, config.page_exts, true )
   end
 
   def find_page_dirs( dirs, lang, slug )
@@ -107,8 +107,8 @@ class Rayo::Storage
   end
 
   # Find first file with given name (or variable) and extension from given set
-  def find_file( dirs, lang, name, exts )
-    glob_files( dirs, lang, name, exts ) { |file,base,ext| return file }
+  def find_file( dirs, lang, name, exts, hidden = false )
+    glob_files( dirs, lang, name, exts, hidden ) { |file,base,ext| return file }
     nil
   end
 
@@ -119,11 +119,17 @@ class Rayo::Storage
     results
   end
 
-  def glob_files( dirs, lang, name, exts, &block )
+  def glob_files( dirs, lang, name, exts, hidden = false, &block )
     lang_prefix = "." + lang
 
     glob dirs, name + lang_prefix, //, exts, &block # Search with given name and language
     glob dirs, name, //, exts, &block # Search with given name without language
+
+    if hidden
+      glob dirs, '_' + name + lang_prefix, //, exts, &block # Search hidden with given name and language
+      glob dirs, '_' + name, //, exts, &block # Search hidden with given name without language
+    end
+
     glob dirs, '%*' + lang_prefix, /^%.+\.#{lang}$/, exts, &block # Search with variable and language
     glob dirs, '%*',  /^%.+$/, exts, &block # Search with variable without language
   end
