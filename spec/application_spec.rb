@@ -24,6 +24,7 @@ describe "Multilingual application" do
         storage.file path( 'content', 'pages', 'users.yml' ), "title: Users\n"
         storage.file path( 'content', 'pages', 'users', '%name.yml' ), "title: <%=name%>\'s page\n"
         storage.file path( 'content', 'pages', 'users', 'special.yml' ), "title: Special page\n"
+        storage.file path( 'content', 'pages', 'users', 'special.html' ), "Spec: <r:find url=\"/\"><r:children:each><r:title /> </r:children:each></r:find>"
         storage.file path( 'content', 'pages', 'users', '_hidden.yml' ), "title: Hidden page\n"
         storage
       end
@@ -77,7 +78,7 @@ describe "Multilingual application" do
   it "should respond to /en/users/special" do
     get '/en/users/special'
     last_response.should be_ok
-    last_response.body.should == '<html><title>Special page</title><body>Example content: </body></html>'
+    last_response.body.should == '<html><title>Special page</title><body>Spec: Users Test Page </body></html>'
   end
 
   it "should respond to /en/users/hidden" do

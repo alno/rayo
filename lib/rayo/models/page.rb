@@ -33,7 +33,9 @@ class Rayo::Models::Page
   def relative( url )
     path = url.split '/'
 
-    if path.first && path.first.empty?
+    if path.empty?
+      @storage.root_page( @lang )
+    elsif path.first && path.first.empty?
       @storage.root_page( @lang ).descendant( path[1..-1] )
     else
       descendant( path )
