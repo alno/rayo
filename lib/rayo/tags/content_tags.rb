@@ -39,7 +39,7 @@ module Rayo::Tags::ContentTags
 
   tag 'snippet' do |tag|
     snippet_name = tag.attr['name']
-    snippet = tag.globals.storage.snippet( tag.globals.page.lang, snippet_name, tag.globals.format )
+    snippet = tag.globals.storage.snippet( tag.globals.page.lang, snippet_name, tag.attr['format'] || tag.globals.format )
 
     if snippet
       snippet.render( tag.globals.page.parser )
@@ -51,7 +51,7 @@ module Rayo::Tags::ContentTags
   private
 
   def find_part( tag )
-    tag.locals.page.find_part( tag.globals.format, tag.attr['part'] || 'body', tag.attr['inherit'] == 'true' )
+    tag.locals.page.find_part( tag.attr['format'] || tag.globals.format, tag.attr['part'] || 'body', tag.attr['inherit'] == 'true' )
   end
 
 end

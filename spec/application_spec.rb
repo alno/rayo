@@ -20,6 +20,7 @@ describe "Multilingual application" do
         storage.file path( 'content', 'pages', 'index.xml' ), "Example XML content: <r:children:each><r:title /> </r:children:each>"
         storage.file path( 'content', 'pages', 'test.yml' ), "title: Test Page\n"
         storage.file path( 'content', 'pages', 'test.html' ), "Test <r:snippet name=\"test\" />"
+        storage.file path( 'content', 'pages', 'test.xml' ), "Test <r:snippet name=\"test\" format=\"html\" />"
         storage.file path( 'content', 'pages', 'users.yml' ), "title: Users\n"
         storage.file path( 'content', 'pages', 'users', '%name.yml' ), "title: <%=name%>\'s page\n"
         storage
@@ -52,6 +53,12 @@ describe "Multilingual application" do
     get '/en/test'
     last_response.should be_ok
     last_response.body.should == '<html><title>Test Page</title><body>Test Test snippet</body></html>'
+  end
+
+  it "should respond to /en/test.xml" do
+    get '/en/test.xml'
+    last_response.should be_ok
+    last_response.body.should == '<xml>Test Test snippet</xml>'
   end
 
   it "should respond to /en/users" do

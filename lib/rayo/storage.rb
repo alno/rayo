@@ -14,11 +14,11 @@ class Rayo::Storage
   end
 
   def snippet( lang, name, format )
-    @snippets["#{lang}|#{name}|#{format}"] ||= find_renderable( :snippets, lang, name.to_s, format ) || raise( "Snippet '#{name}' not found" )
+    @snippets["#{lang}|#{name}|#{format}"] ||= find_renderable( :snippets, lang, name.to_s, format )
   end
 
   def layout( lang, name, format )
-    @layouts["#{lang}|#{name}|#{format}"] ||= find_renderable( :layouts, lang, name.to_s, format ) || raise( "Layout '#{name}' not found" )
+    @layouts["#{lang}|#{name}|#{format}"] ||= find_renderable( :layouts, lang, name.to_s, format )
   end
 
   # Retrieves root page for specific language
