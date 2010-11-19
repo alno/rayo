@@ -43,6 +43,7 @@ describe "Multilingual application" do
 
   it "should respond to /en.xml" do
     get '/en.xml'
+    puts last_response.errors
     last_response.should be_ok
     last_response.body.should == '<xml>Example XML content: Users Test Page </xml>'
   end

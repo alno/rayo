@@ -51,13 +51,13 @@ class Rayo::Storage
   end
 
   def find_renderable( type, lang, name, format )
-    if file = find_file( [config.directory( type )], lang, name, config.renderable_exts )
-      renderable( file, File.extname( file ) )
+    if file = find_file( [config.directory( type )], lang, name, config.renderable_exts( format ) )
+      renderable( file, format, File.extname( file ) )
     end
   end
 
   def find_page_file( dirs, lang, slug, format )
-    find_file( dirs, lang, slug, config.page_exts ) || find_file( dirs, lang, '_' + slug, config.page_exts ) 
+    find_file( dirs, lang, slug, config.page_exts ) || find_file( dirs, lang, '_' + slug, config.page_exts )
   end
 
   def find_page_dirs( dirs, lang, slug, format )
@@ -71,7 +71,7 @@ class Rayo::Storage
       elem_name = elems[0]
       elem_lang = elems[1]
 
-      res << elem_name unless ['%','_'].include?( elem_name[0..0] ) || (dirs == ([ @config.directory :pages ]) && (elem_name == 'index')) || (elem_lang && elem_lang != lang) 
+      res << elem_name unless ['%','_'].include?( elem_name[0..0] ) || (dirs == ([ @config.directory :pages ]) && (elem_name == 'index')) || (elem_lang && elem_lang != lang)
     end
     res.uniq
   end
@@ -79,20 +79,20 @@ class Rayo::Storage
   def find_page_parts( page_file, lang, format )
     parts = {}
     page_file_base = File.basename( page_file ).split('.').first
-    glob_files File.dirname( page_file ), lang, page_file_base + '*', config.renderable_exts do |file,base,ext|
+    glob_files File.dirname( page_file ), lang, page_file_base + '*', config.renderable_exts( format ) do |file,base,ext|
       elems = base.split('.')
 
       if elems.shift == page_file_base # Remove base (slug or variable)
         if elems.size == 0 # There are no part name and language
-          parts[ 'body'   ] ||= renderable( file, ext )
+          parts[ 'body'   ] ||= renderable( file, format, ext )
         elsif elems.size == 1 # There are no language or no part name
           if elems[0] == lang
-            parts[ 'body'   ] ||= renderable( file, ext )
+            parts[ 'body'   ] ||= renderable( file, format, ext )
           else
-            parts[ elems[0] ] ||= renderable( file, ext )
+            parts[ elems[0] ] ||= renderable( file, format, ext )
           end
         else
-          parts[ elems[0] ] ||= renderable( file, ext ) if elems[1] == lang
+          parts[ elems[0] ] ||= renderable( file, format, ext ) if elems[1] == lang
         end
       end
     end
@@ -105,8 +105,8 @@ class Rayo::Storage
 
   private
 
-  def renderable( file, ext )
-    Rayo::Models::Renderable.new( self, file, config.filter( ext[1..-1] ) || raise( "Filter for '#{ext} not found" ) )
+  def renderable( file, format, ext )
+    Rayo::Models::Renderable.new( self, file, config.filter( ext[1..-1], format ) || raise( "Filter for '#{ext} not found" ) )
   end
 
   # Find first file with given name (or variable) and extension from given set

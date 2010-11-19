@@ -12,20 +12,12 @@ class Rayo::Config
   attr_accessor :default_format
   attr_accessor :default_domain
 
-  attr_reader :renderable_exts
-
   def initialize
-    @default_format = 'html'
-    @renderable_exts = []
-
     @languages = ['en']
     @page_exts = ['.yml']
 
-    @filters = {}
+    @formats = {}
     @domains = []
-
-    # Default filters
-    add_filter('html'){|source| source }
 
     @tagger = Object.new
     @tagger.extend Rayo::Taggable
@@ -34,6 +26,9 @@ class Rayo::Config
     add_tags Rayo::Tags::PropertyTags
     add_tags Rayo::Tags::ContentTags
     add_tags Rayo::Tags::NavigationTags
+
+    # Default format
+    @default_format = 'html'
   end
 
   # Add tags defined in module
@@ -41,16 +36,6 @@ class Rayo::Config
   # @param [Module] module defining tags to use
   def add_tags( tag_module )
     @tagger.extend tag_module
-  end
-
-  # Add filter
-  #
-  # @param [String,Symbol] renderable file extension
-  # @param [String,Symbol] requested content format
-  # @param [Proc] filter proc which accepts source and return it in processed form
-  def add_filter( from, to = default_format, &filter )
-    @filters["#{from}-#{to}"] = filter
-    @renderable_exts << ".#{from}" unless @renderable_exts.include? ".#{from}"
   end
 
   # Add domain
@@ -70,12 +55,31 @@ class Rayo::Config
     File.join( @content_dir, content_type.to_s )
   end
 
+  # Add filter
+  #
+  # @param [String,Symbol] renderable file extension
+  # @param [String,Symbol] requested content format
+  # @param [Proc] filter proc which accepts source and return it in processed form
+  def add_filter( from, to = nil, &filter )
+    format( to ).add_filter( from, filter )
+  end
+
   # Get filter by renderable extension and requested content extension
   #
   # @param [String,Symbol] renderable file extension
   # @param [String,Symbol] requested content format
-  def filter( from, to = default_format )
-    @filters["#{from}-#{to}"]
+  def filter( from, to = nil )
+    format( to ).filter( from )
+  end
+
+  def renderable_exts( to )
+    format( to ).renderable_exts
+  end
+
+  def format( name = nil )
+    name ||= default_format
+
+    @formats[name.to_s] ||= Rayo::Config::Format.new name
   end
 
   def domain( host )
@@ -89,3 +93,4 @@ class Rayo::Config
 end
 
 require File.join(File.dirname(__FILE__), 'config/domain.rb')
+require File.join(File.dirname(__FILE__), 'config/format.rb')
