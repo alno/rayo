@@ -48,6 +48,17 @@ module Rayo::Tags::ContentTags
     end
   end
 
+  tag 'with' do |tag|
+    old_format = tag.globals.format
+    tag.globals.format = tag.attr['format']
+
+    result = tag.expand
+
+    tag.globals.format = old_format
+
+    result
+  end
+
   private
 
   def find_part( tag )

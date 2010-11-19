@@ -29,7 +29,9 @@ module Rayo::Tags::PropertyTags
   end
 
   tag 'url' do |tag|
-    "/#{tag.locals.page.lang}/#{tag.locals.page.path.join('/')}"
+    u = "/#{tag.locals.page.lang}/#{tag.locals.page.path.join('/')}"
+    u << ".#{tag.globals.format}" if tag.globals.format != tag.globals.config.default_format
+    u
   end
 
   tag 'link' do |tag|

@@ -9,6 +9,7 @@ class Rayo::TagContext < Radius::Context
 
     globals.page = @page
     globals.storage = @page.storage
+    globals.config = @page.storage.config
 
     tagger = @page.storage.config.create_tagger
     tagger.methods.each do |name|

@@ -23,37 +23,26 @@ module Rayo::Tags::NavigationTags
   end
 
   tag 'children:count' do |tag|
-    tag.locals.children.size
+    prepare_children( tag ).size
   end
 
   tag 'children:first' do |tag|
-    if first = tag.locals.children.first
+    if first = prepare_children( tag ).first
       tag.locals.page = first
       tag.expand
     end
   end
 
   tag 'children:last' do |tag|
-    if last = tag.locals.children.last
+    if last = prepare_children( tag ).last
       tag.locals.page = last
       tag.expand
     end
   end
 
   tag 'children:each' do |tag|
-    result = ''
-
-    children = tag.locals.children
-
-    if by = tag.attr['by']
-      if tag.attr['order'] == 'desc'
-        children = children.sort {|a,b| b[by] <=> a[by] }
-      else
-        children = children.sort {|a,b| a[by] <=> b[by] }
-      end
-    end
-
-    children = children[0..(tag.attr['limit'].to_i - 1)] if tag.attr['limit']
+    result = ""
+    children = prepare_children( tag )
 
     children.each_with_index do |item, i|
       tag.locals.child = item
@@ -67,7 +56,6 @@ module Rayo::Tags::NavigationTags
   end
 
   tag 'related' do |tag|
-    puts  tag.locals.page['relations'].inspect
     tag.locals.relation = tag.locals.page['relations'][tag.attr['rel']]
     tag.expand
   end
@@ -102,6 +90,23 @@ module Rayo::Tags::NavigationTags
       result << tag.expand
     end
     result
+  end
+
+  private
+
+  def prepare_children( tag )
+    children = tag.locals.children
+
+    if by = tag.attr['by']
+      if tag.attr['order'] == 'desc'
+        children = children.sort {|a,b| b[by] <=> a[by] }
+      else
+        children = children.sort {|a,b| a[by] <=> b[by] }
+      end
+    end
+
+    children = children[0..(tag.attr['limit'].to_i - 1)] if tag.attr['limit']
+    children
   end
 
 end
