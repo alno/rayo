@@ -10,6 +10,10 @@ module Rayo::Tags::PropertyTags
     tag.locals.page.context['description']
   end
 
+  tag 'value' do |tag|
+    tag.locals.page[tag.attr['name']]
+  end
+
   tag 'path' do |tag|
     basepath = tag.globals.page.path
     path = tag.locals.page.path
