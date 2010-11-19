@@ -24,7 +24,7 @@ module Rayo::Tags::PropertyTags
         i = i + 1
       end
 
-      '../' * (basepath.size - i) + path[i..-1].join('/')
+      './' + ('../' * (basepath.size - i)) + path[i..-1].join('/')
     end
   end
 
