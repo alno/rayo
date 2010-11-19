@@ -31,6 +31,7 @@ describe "Multilingual application" do
 
   it "should respond to /en" do
     get '/en'
+    puts last_response.errors
     last_response.should be_ok
     last_response.body.should == '<html><title>Index Page</title><body>Example content: Users Test Page </body></html>'
   end
@@ -59,7 +60,7 @@ describe "Multilingual application" do
     last_response.body.should == '<html><title>Users</title><body>Example content: </body></html>'
   end
 
-  it "should respond to /en/users" do
+  it "should respond to /en/users/alex" do
     get '/en/users/alex'
     last_response.should be_ok
     last_response.body.should == '<html><title>alex\'s page</title><body>Example content: </body></html>'

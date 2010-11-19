@@ -2,11 +2,13 @@ class Rayo::Models::Renderable
 
   attr_reader :storage
   attr_reader :file
+  attr_reader :format
   attr_reader :filter
 
-  def initialize( storage, file, filter )
+  def initialize( storage, file, format, filter )
     @storage = storage
     @file = file
+    @format = format
     @filter = filter
   end
 
@@ -15,7 +17,9 @@ class Rayo::Models::Renderable
   end
 
   def render( parser )
-    filter.call( parser.parse( source ) )
+    parser.context.with_format @format do
+      filter.call( parser.parse( source ) )
+    end
   end
 
 end

@@ -32,4 +32,15 @@ class Rayo::TagContext < Radius::Context
     "<strong class=\"error\">#{text}</strong>"
   end
 
+  def with_format( format )
+    old_format = globals.format
+    globals.format = format
+
+    result = yield
+
+    globals.format = old_format
+
+    result
+  end
+
 end

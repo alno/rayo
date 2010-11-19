@@ -26,7 +26,7 @@ describe Rayo::Models::Page do
 
   context "'/'" do
 
-    before { @root = @storage.root_page( 'en', 'html' ) }
+    before { @root = @storage.root_page( 'en' ) }
 
     it { @root.descendant([]).should == @root }
     it { @root.path.should == [] }
@@ -38,7 +38,7 @@ describe Rayo::Models::Page do
 
   context "'/test'" do
 
-    before { @page = @storage.page(:en, ['test'], 'html') }
+    before { @page = @storage.page(:en, ['test']) }
 
     specify { @page.should_not be_nil }
     specify { @page.path.should == ['test'] }
@@ -46,15 +46,15 @@ describe Rayo::Models::Page do
     specify { @page.file.should == path( 'content', 'pages', 'test.yml' ) }
 
     specify { @page.should have(0).children }
-    specify { @page.should have(2).parts }
-    specify { @page.parts.should include 'body' }
-    specify { @page.parts.should include 'footer' }
+    specify { @page.parts('html').size.should == 2 }
+    specify { @page.parts('html').should include 'body' }
+    specify { @page.parts('html').should include 'footer' }
 
   end
 
   context "'/test2'" do
 
-    before { @page = @storage.page(:en, ['test2'], 'html') }
+    before { @page = @storage.page(:en, ['test2']) }
 
     specify { @page.should_not be_nil }
     specify { @page.path.should == ['test2'] }
@@ -62,14 +62,14 @@ describe Rayo::Models::Page do
     specify { @page.file.should == path( 'content', 'pages', 'test2.en.yml' ) }
 
     specify { @page.should have(0).children }
-    specify { @page.should have(1).parts }
-    specify { @page.parts.should include 'body' }
+    specify { @page.parts('html').size.should == 1 }
+    specify { @page.parts('html').should include 'body' }
 
   end
 
   context "'/test2' with lang 'ru'" do
 
-    before { @page = @storage.page(:ru, ['test2'], 'html') }
+    before { @page = @storage.page(:ru, ['test2']) }
 
     specify { @page.should_not be_nil }
     specify { @page.path.should == ['test2'] }
@@ -77,14 +77,14 @@ describe Rayo::Models::Page do
     specify { @page.file.should == path( 'content', 'pages', 'test2.ru.yml' ) }
 
     specify { @page.should have(0).children }
-    specify { @page.should have(1).parts }
-    specify { @page.parts.should include 'body' }
+    specify { @page.parts('html').size.should == 1 }
+    specify { @page.parts('html').should include 'body' }
 
   end
 
   context "'/test3'" do
 
-    before { @page = @storage.page(:en, ['test3'], 'html') }
+    before { @page = @storage.page(:en, ['test3']) }
 
     specify { @page.should_not be_nil }
     specify { @page.path.should == ['test3'] }
@@ -92,14 +92,14 @@ describe Rayo::Models::Page do
     specify { @page.file.should == path( 'content', 'pages', 'test3.en.yml' ) }
 
     specify { @page.should have(0).children }
-    specify { @page.should have(1).parts }
-    specify { @page.parts.should include 'body' }
+    specify { @page.parts('html').size.should == 1 }
+    specify { @page.parts('html').should include 'body' }
 
   end
 
   context "'/test4'" do
 
-    before { @page = @storage.page(:en, ['test4'], 'html') }
+    before { @page = @storage.page(:en, ['test4']) }
 
     specify { @page.should_not be_nil }
     specify { @page.path.should == ['test4'] }
@@ -107,14 +107,14 @@ describe Rayo::Models::Page do
     specify { @page.file.should == path( 'content', 'pages', '_test4.yml' ) }
 
     specify { @page.should have(0).children }
-    specify { @page.should have(1).parts }
-    specify { @page.parts.should include 'body' }
+    specify { @page.parts('html').size.should == 1 }
+    specify { @page.parts('html').should include 'body' }
 
   end
 
   context "'/users'" do
 
-    before { @page = @storage.page(:en, ['users'], 'html') }
+    before { @page = @storage.page(:en, ['users']) }
 
     specify { @page.should have(1).children }
 
@@ -122,7 +122,7 @@ describe Rayo::Models::Page do
 
   context "'/users/alex'" do
 
-    before { @page = @storage.page(:en, ['users','alex'], 'html') }
+    before { @page = @storage.page(:en, ['users','alex']) }
 
     specify { @page.should_not be_nil }
     specify { @page.path.should == ['users','alex'] }
@@ -134,7 +134,7 @@ describe Rayo::Models::Page do
 
   context "'/unknown_page'" do
 
-    before { @page = @storage.status_page(:en, ['unknown_page'], 'html', 404) }
+    before { @page = @storage.status_page(:en, ['unknown_page'], 404) }
 
     specify { @page.should_not be_nil }
     specify { @page.path.should == ['unknown_page'] }
@@ -142,8 +142,8 @@ describe Rayo::Models::Page do
     specify { @page.context.should == { 'status' => 404, 'title' => 'Not found' } }
     specify { @page.file.should == path( 'content', 'pages', '_404.yml' ) }
     specify { @page.should have(0).children }
-    specify { @page.should have(1).parts }
-    specify { @page.parts.should include 'body' }
+    specify { @page.parts('html').size.should == 1 }
+    specify { @page.parts('html').should include 'body' }
 
   end
 

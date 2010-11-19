@@ -28,10 +28,10 @@ class Rayo::Application < Sinatra::Base
 
       storage = create_storage( cfg ) # Page storage
 
-      page = storage.page( lang, path, format || config.default_format) # Find page by path
-      page = storage.status_page( lang, path, format || config.default_format, 404 ) unless page && page.file # Render 404 page if there are no page, or there are no file
+      page = storage.page( lang, path ) # Find page by path
+      page = storage.status_page( lang, path, 404 ) unless page && page.file # Render 404 page if there are no page, or there are no file
 
-      [ page[:status], page.render ] # Return page status and content
+      [ page[:status], page.render( format || config.default_format ) ] # Return page status and content
     else
       domain_not_found
     end

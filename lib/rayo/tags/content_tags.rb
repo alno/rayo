@@ -24,7 +24,7 @@ module Rayo::Tags::ContentTags
       tag.globals.layout_stack ||= [] # Prepare layout stack
       tag.globals.content_stack ||= [] # Prepare content stack
 
-      if layout = tag.globals.storage.layout( tag.globals.page.lang, name, tag.globals.page.format )
+      if layout = tag.globals.storage.layout( tag.globals.page.lang, name, tag.globals.format )
         tag.globals.layout_stack << name # Track this layout on the stack
         tag.globals.content_stack << tag.expand # Save contents of inside_layout for later insertion
 
@@ -39,7 +39,7 @@ module Rayo::Tags::ContentTags
 
   tag 'snippet' do |tag|
     snippet_name = tag.attr['name']
-    snippet = tag.globals.storage.snippet( tag.globals.page.lang, snippet_name, tag.globals.page.format )
+    snippet = tag.globals.storage.snippet( tag.globals.page.lang, snippet_name, tag.globals.format )
 
     if snippet
       snippet.render( tag.globals.page.parser )
@@ -51,7 +51,7 @@ module Rayo::Tags::ContentTags
   private
 
   def find_part( tag )
-    tag.locals.page.find_part( tag.attr['part'] || 'body', tag.attr['inherit'] == 'true' )
+    tag.locals.page.find_part( tag.globals.format, tag.attr['part'] || 'body', tag.attr['inherit'] == 'true' )
   end
 
 end

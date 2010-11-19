@@ -6,14 +6,16 @@ require File.join(File.dirname(__FILE__), '..', 'tag_context.rb')
 
 class Rayo::Models::Page
 
-  attr_reader :storage, :parent, :lang, :path, :format
+  attr_reader :storage, :parent, :lang, :path
 
-  def initialize( storage, parent, lang, path, format )
+  def initialize( storage, parent, lang, path )
     @storage = storage
     @parent = parent
     @lang = lang
     @path = path
-    @format = format
+
+    @parts = {}
+    @layouts = {}
   end
 
   def descendant( relative_path )
@@ -25,14 +27,14 @@ class Rayo::Models::Page
   end
 
   def children
-    @children ||= @storage.find_pages( directories, @lang, @format ).map{|name| child( name ) }
+    @children ||= @storage.find_pages( directories, @lang ).map{|name| child( name ) }
   end
 
   def relative( url )
     path = url.split '/'
 
     if path.first && path.first.empty?
-      @storage.root_page( @lang, @format ).descendant( path[1..-1] )
+      @storage.root_page( @lang ).descendant( path[1..-1] )
     else
       descendant( path )
     end
@@ -42,31 +44,39 @@ class Rayo::Models::Page
     @children_cache ||= {}
     return @children_cache[ slug ] if @children_cache.include? slug
 
-    page = Rayo::Models::Page.new( @storage, self, @lang, @path + [slug], @format )
+    page = Rayo::Models::Page.new( @storage, self, @lang, @path + [slug] )
     page = nil if page.file.nil? && page.directories.empty?
 
     @children_cache[ slug ] = page
   end
 
   def directories
-    @directories ||= @storage.find_page_dirs( @parent.directories, @lang, @path.last, @format )
+    @directories ||= @storage.find_page_dirs( @parent.directories, @lang, @path.last )
   end
 
   def file
-    @file ||= @storage.find_page_file( @parent.directories, @lang, @path.last, @format )
+    @file ||= @storage.find_page_file( @parent.directories, @lang, @path.last )
   end
 
-  def parts
-    @parts ||= file ? @storage.find_page_parts( file, @lang, @format ) : {}
+  # Get page parts for given format
+  # @param [String,Symbol] part format
+  # @return [List<Rayo::Models::Renderable>] part list
+  def parts( format )
+    @parts[format.to_s] ||= file ? @storage.find_page_parts( file, @lang, format.to_s ) : {}
   end
 
-  def find_part( part_name, inherit = false )
+  # Find page part for given format
+  # @param [String,Symbol] part format
+  # @param [String,Symbol] part name
+  # @param [Boolean] search in super classes
+  # @return [List<Rayo::Models::Renderable>] part list
+  def find_part( format, part_name, inherit = false )
     page = self
-    part = self.parts[part_name]
+    part = self.parts(format)[part_name]
 
     while inherit && !part && page.parent do
       page = page.parent
-      part = page.parts[part_name]
+      part = page.parts(format)[part_name]
     end
 
     part
@@ -95,8 +105,8 @@ class Rayo::Models::Page
     @context
   end
 
-  def layout
-    @layout ||= @storage.layout( @lang, context['layout'], @format )
+  def layout(format)
+    @layouts[format.to_s] ||= @storage.layout( @lang, context['layout'], format )
   end
 
   def []( key )
@@ -105,8 +115,8 @@ class Rayo::Models::Page
     context[ key ] || params[ key ]
   end
 
-  def render
-    layout.render( parser )
+  def render( format )
+    layout( format ).render( parser )
   end
 
   def parser
