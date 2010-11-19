@@ -47,7 +47,6 @@ module Rayo::Tags::NavigationTags
 
     if by = tag.attr['by']
       if tag.attr['order'] == 'desc'
-        puts children.map{|c| c[by]}.inspect
         children = children.sort {|a,b| b[by] <=> a[by] }
       else
         children = children.sort {|a,b| a[by] <=> b[by] }
