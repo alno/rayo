@@ -4,7 +4,7 @@ class Rayo::Config::Domain
 
   extend Forwardable
 
-  def_delegators :@parent, :create_tagger, :languages, :page_exts, :renderable_exts, :filter
+  def_delegators :@parent, :create_tagger, :languages, :page_exts, :format
 
   attr_reader :name
 

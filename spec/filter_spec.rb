@@ -26,11 +26,11 @@ describe 'Rayo filters' do
     end
 
     it "should have html filter" do
-      config.filter(:html).should_not be_nil
+      config.format.filter(:html).should_not be_nil
     end
 
     it "should have html filter which does nothing" do
-      config.filter('html').call('Some string').should == 'Some string'
+      config.format.filter('html').call('Some string').should == 'Some string'
     end
 
   end

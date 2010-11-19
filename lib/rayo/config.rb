@@ -64,18 +64,6 @@ class Rayo::Config
     format( to ).add_filter( from, filter )
   end
 
-  # Get filter by renderable extension and requested content extension
-  #
-  # @param [String,Symbol] renderable file extension
-  # @param [String,Symbol] requested content format
-  def filter( from, to = nil )
-    format( to ).filter( from )
-  end
-
-  def renderable_exts( to )
-    format( to ).renderable_exts
-  end
-
   def format( name = nil )
     name ||= default_format
 
