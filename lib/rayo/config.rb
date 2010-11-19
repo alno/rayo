@@ -61,7 +61,7 @@ class Rayo::Config
   # @param [String,Symbol] requested content format
   # @param [Proc] filter proc which accepts source and return it in processed form
   def add_filter( from, to = nil, &filter )
-    format( to ).add_filter( from, filter )
+    format( to ).add_filter( from, &filter )
   end
 
   def format( name = nil )
