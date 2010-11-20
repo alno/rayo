@@ -15,7 +15,7 @@ Gem::Specification.new do |s|
   # Gem dependencies
   s.add_dependency "erubis"
   s.add_dependency "radius"
-  s.add_dependency "sinatra", ">=1.0"
+  s.add_dependency "sinatra", ">=1.1.0"
 
   # Development dependencies
   s.add_development_dependency "rspec", ">=2.0"

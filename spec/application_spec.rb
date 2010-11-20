@@ -90,37 +90,37 @@ describe "Multilingual application" do
   it "should redirect from / to /en" do
     get '/'
     last_response.should be_redirect
-    last_response.location.should == '/en'
+    last_response.location.should == 'http://example.org/en'
   end
 
   it "should redirect /en/ to /en" do
     get '/en/'
     last_response.should be_redirect
-    last_response.location.should == '/en'
+    last_response.location.should == 'http://example.org/en'
   end
 
   it "should redirect from /test to /en/test" do
     get '/test'
     last_response.should be_redirect
-    last_response.location.should == '/en/test'
+    last_response.location.should == 'http://example.org/en/test'
   end
 
   it "should redirect from /test/ to /en/test" do
     get '/test/'
     last_response.should be_redirect
-    last_response.location.should == '/en/test'
+    last_response.location.should == 'http://example.org/en/test'
   end
 
   it "should redirect from /en/test/ to /en/test" do
     get '/en/test/'
     last_response.should be_redirect
-    last_response.location.should == '/en/test'
+    last_response.location.should == 'http://example.org/en/test'
   end
 
   it "should redirect from /test/ttt to /en/test/ttt" do
     get '/test/ttt'
     last_response.should be_redirect
-    last_response.location.should == '/en/test/ttt'
+    last_response.location.should == 'http://example.org/en/test/ttt'
   end
 
 end

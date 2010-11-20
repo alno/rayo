@@ -31,16 +31,29 @@ class Rayo::Application < Sinatra::Base
       page = storage.page( lang, path ) # Find page by path
       page = storage.status_page( lang, path, 404 ) unless page && page.file # Render 404 page if there are no page, or there are no file
 
-      [ page[:status], page.render( format || config.default_format ) ] # Return page status and content
+      render_page page, format # Render found page with given format
     else
-      domain_not_found
+      not_found 'Page not found'
     end
   end
 
   private
 
-  def domain_not_found
-    [ 404, "Page not found" ]
+  def render_page( page, format )
+    format ||= config.default_format
+
+    status page[:status] # Set response status
+    body page.render( format ) # Set response body
+
+    content_type format # Set Content-Type header
+    expires page[:expires] if page[:expires] # Set expires header
+  end
+
+  def redirect_to_page( lang, path, format )
+    url = '/' + [ lang || select_language, *path ].join('/')
+    url << '.' + format if format
+
+    redirect url
   end
 
   def analyze_path( p )
@@ -58,13 +71,6 @@ class Rayo::Application < Sinatra::Base
     end
 
     [redir || lang.nil?, lang, path, format]
-  end
-
-  def redirect_to_page( lang, path, format )
-    url = '/' + [ lang || select_language, *path ].join('/')
-    url << '.' + format if format
-
-    redirect url
   end
 
   def create_storage( cfg )
