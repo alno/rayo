@@ -69,6 +69,7 @@ class Rayo::Application < Sinatra::Base
     end
 
     if File.exists? file_path # If cached page exists
+      content_type format # Set Content-Type header
       body File.read( file_path ) # Return its content as a body
     else
       yield # Render page

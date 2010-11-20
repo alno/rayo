@@ -118,7 +118,7 @@ And register it:
 
   c.add_tags MyTags
 
-=== Multidomain applications
+=== Multidomain setup
 
 Sometimes you may want to serve different domains with one application sharing layouts and snippets. Rayo has built-in support for this scenario. All you need is to create subdirectories in pages for different domains and add some lines to <tt>configure</tt> block:
 
@@ -141,10 +141,19 @@ With both lines corresponding directory structure should be:
 
 That's all you need to build multi-domain application.
 
+== Caching
+
+Rayo supports transparent caching of your generated pages in filesystem which is configured by one line, specifying cache directory:
+
+  c.cache_dir = 'your cache directory'
+
+Every page after request are written to corresponding file in cache directory, so next requests will be served from there. And if you configure your web server to search for files in cache directory ruby application will not be touched at all.
+
+For single-domain setups it may be useful to point <tt>cache_dir</tt> to the public location, so it will be served by web-server without additional configuration. 
+
 == Planned features
 
 * Support for sites without I18n
-* Support for different page formats
 * Drop-in tag libary support
 * Support for pages without .yml
 * Generator which creates a set of static pages from content structure
