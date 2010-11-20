@@ -7,6 +7,7 @@ class Rayo::Config::Domain
   def_delegators :@parent, :create_tagger, :languages, :page_exts, :format, :default_format
 
   attr_reader :name
+  attr_writer :cache_dir
 
   def initialize( parent, name, exp )
     @parent = parent
@@ -24,6 +25,11 @@ class Rayo::Config::Domain
     else
       @parent.directory( content_type )
     end
+  end
+
+  # Get cache directory for this domain. If it was not set explicitly it'll be global cache_dir with domain name appended
+  def cache_dir
+    @cache_dir || @parent.cache_dir && File.join( @parent.cache_dir, @name )
   end
 
 end

@@ -6,6 +6,8 @@ require File.join(File.dirname(__FILE__), 'tags/navigation_tags.rb')
 class Rayo::Config
 
   attr_accessor :content_dir
+  attr_accessor :cache_dir
+
   attr_accessor :languages
   attr_accessor :page_exts
 

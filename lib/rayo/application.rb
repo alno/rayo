@@ -1,4 +1,5 @@
 require 'sinatra/base'
+require 'ftools'
 
 require File.join(File.dirname(__FILE__), 'storage.rb')
 require File.join(File.dirname(__FILE__), 'config.rb')
@@ -24,14 +25,18 @@ class Rayo::Application < Sinatra::Base
     if cfg = config.domain( request.host ) # Config for current host
       redir, lang, path, format = analyze_path url # Analyze path
 
-      redirect_to_page( lang || select_language, path, format ) if redir # Redirect
+      redirect_to_page( lang || select_language, path, format ) if redir # Redirect if needed
 
-      storage = create_storage( cfg ) # Page storage
+      format ||= cfg.default_format # Set default format if needed
 
-      page = storage.page( lang, path ) # Find page by path
-      page = storage.status_page( lang, path, 404 ) unless page && page.file # Render 404 page if there are no page, or there are no file
+      cache_page cfg, lang, path, format do
+        storage = create_storage( cfg ) # Page storage
 
-      render_page page, format # Render found page with given format
+        page = storage.page( lang, path ) # Find page by path
+        page = storage.status_page( lang, path, 404 ) unless page && page.file # Render 404 page if there are no page, or there are no file
+
+        render_page page, format # Render found page with given format
+      end
     else
       not_found 'Page not found'
     end
@@ -40,8 +45,6 @@ class Rayo::Application < Sinatra::Base
   private
 
   def render_page( page, format )
-    format ||= config.default_format
-
     status page[:status] # Set response status
     body page.render( format ) # Set response body
 
@@ -54,6 +57,25 @@ class Rayo::Application < Sinatra::Base
     url << '.' + format if format
 
     redirect url
+  end
+
+  def cache_page( cfg, lang, path, format )
+    return yield unless cfg.cache_dir # Return block result if no cache directory set up
+
+    if path.empty?
+      file_path = File.join( cfg.cache_dir, lang, "index.#{format}" )
+    else
+      file_path = File.join( cfg.cache_dir, lang, path[0..-2], "#{path.last}.#{format}" )
+    end
+
+    if File.exists? file_path # If cached page exists
+      body File.read( file_path ) # Return its content as a body
+    else
+      yield # Render page
+
+      FileUtils.mkdir_p( File.dirname file_path ) # Create directory
+      File.open( file_path, 'w' ){|f| f.write body } # Write content
+    end
   end
 
   def analyze_path( p )
