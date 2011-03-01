@@ -149,7 +149,7 @@ Rayo supports transparent caching of your generated pages in filesystem which is
 
 Every page after request are written to corresponding file in cache directory, so next requests will be served from there. And if you configure your web server to search for files in cache directory ruby application will not be touched at all.
 
-For single-domain setups it may be useful to point <tt>cache_dir</tt> to the public location, so it will be served by web-server without additional configuration. 
+For single-domain setups it may be useful to point <tt>cache_dir</tt> to the public location, so it will be served by web-server without additional configuration.
 
 == Planned features
 

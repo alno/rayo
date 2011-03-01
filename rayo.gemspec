@@ -31,7 +31,6 @@ Gem::Specification.new do |s|
 
   # Info
   s.has_rdoc = true
-  s.homepage = "http://github.com/alno/rayo"
   s.rdoc_options = ["--line-numbers", "--inline-source", "--title", "Rayo CMS", "--main", "README.rdoc"]
 
 end

@@ -33,7 +33,7 @@ module Rayo::Tags::PropertyTags
   end
 
   tag 'url' do |tag|
-    u = "/#{tag.locals.page.lang}/#{tag.locals.page.path.join('/')}"
+    u = "/#{tag.attr['lang'] || tag.locals.page.lang}/#{tag.locals.page.path.join('/')}"
     u << ".#{tag.globals.format}" if tag.globals.format != tag.globals.config.default_format
     u
   end
@@ -42,12 +42,28 @@ module Rayo::Tags::PropertyTags
     "<a href=\"#{send 'tag:path', tag}\">#{tag.single? ? send( 'tag:title', tag ) : tag.expand}</a>"
   end
 
+  tag 'if_lang' do |tag|
+    if_matches( tag.locals.page.lang, tag ) ? tag.expand : ''
+  end
+
+  tag 'unless_lang' do |tag|
+    if_matches( tag.locals.page.lang, tag ) ? '' : tag.expand
+  end
+
   tag 'if_url' do |tag|
-    if_url( tag ) && tag.expand || ''
+    if_matches( tag.locals.page.path.join('/'), tag ) ? tag.expand : ''
   end
 
   tag 'unless_url' do |tag|
-    if_url( tag ) && '' || tag.expand
+    if_matches( tag.locals.page.path.join('/'), tag ) ? '' : tag.expand
+  end
+
+  tag 'if_domain' do |tag|
+    (tag.locals.page.storage.config.respond_to?(:name) && if_matches( tag.locals.page.storage.config.name, tag )) ? tag.expand : ''
+  end
+
+  tag 'unless_domain' do |tag|
+    (tag.locals.page.storage.config.respond_to?(:name) && if_matches( tag.locals.page.storage.config.name, tag )) ? '' : tag.expand
   end
 
   tag 'date' do |tag|
@@ -70,8 +86,8 @@ module Rayo::Tags::PropertyTags
     end
   end
 
-  def if_url( tag )
-    tag.locals.page.path =~ Regexp.new( tag.attr['matches'] )
+  def if_matches( prop, tag )
+    prop =~ Regexp.new( tag.attr['matches'] )
   end
 
 end
